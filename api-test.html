@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Test</title>
+<style>
+  body{font-family:sans-serif;background:#111;color:#eee;padding:16px;}
+  button{display:block;width:100%;padding:14px;margin:8px 0;font-size:1rem;border-radius:8px;border:none;background:#3ddc84;color:#06251a;font-weight:700;}
+  pre{background:#222;padding:10px;border-radius:8px;white-space:pre-wrap;word-break:break-all;font-size:0.8rem;}
+  h3{margin-top:20px;}
+</style>
+</head>
+<body>
+<h2>Apps Script API Test</h2>
+<p>URL: <code id="url"></code></p>
+
+<h3>1. GET met fetch (normaal)</h3>
+<button onclick="testGetNormal()">Test GET (normaal)</button>
+<pre id="out1">-</pre>
+
+<h3>2. POST met fetch (text/plain, normaal)</h3>
+<button onclick="testPostNormal()">Test POST (normaal)</button>
+<pre id="out2">-</pre>
+
+<h3>3. POST met no-cors (fire-and-forget)</h3>
+<button onclick="testPostNoCors()">Test POST (no-cors)</button>
+<pre id="out3">-</pre>
+
+<h3>4. GET opnieuw na POST (no-cors) — check of data is opgeslagen</h3>
+<button onclick="testGetAfter()">Test GET opnieuw</button>
+<pre id="out4">-</pre>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycby86H9bAYgZ0vA_R04bEYW5TTvLWbZo2y_Gp6u97dS-h4uzJKkEyzVK8j0bpUX5s5m4GQ/exec";
+document.getElementById("url").textContent = API_URL;
+
+function log(id, msg){
+  document.getElementById(id).textContent = msg;
+}
+
+async function testGetNormal(){
+  log("out1", "Bezig...");
+  try{
+    const res = await fetch(API_URL);
+    const text = await res.text();
+    log("out1", "STATUS: " + res.status + "\n\n" + text);
+  }catch(e){
+    log("out1", "FOUT: " + e.message);
+  }
+}
+
+async function testPostNormal(){
+  log("out2", "Bezig...");
+  const payload = { test: true, time: new Date().toISOString() };
+  try{
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify(payload)
+    });
+    const text = await res.text();
+    log("out2", "STATUS: " + res.status + "\n\n" + text);
+  }catch(e){
+    log("out2", "FOUT: " + e.message);
+  }
+}
+
+async function testPostNoCors(){
+  log("out3", "Bezig...");
+  const payload = { test: true, source: "no-cors", time: new Date().toISOString() };
+  try{
+    const res = await fetch(API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify(payload)
+    });
+    log("out3", "Request verstuurd (no-cors geeft geen leesbare response).\ntype: " + res.type + "\nstatus: " + res.status);
+  }catch(e){
+    log("out3", "FOUT: " + e.message);
+  }
+}
+
+async function testGetAfter(){
+  log("out4", "Bezig...");
+  try{
+    const res = await fetch(API_URL + "?_=" + Date.now());
+    const text = await res.text();
+    log("out4", "STATUS: " + res.status + "\n\n" + text);
+  }catch(e){
+    log("out4", "FOUT: " + e.message);
+  }
+}
+</script>
+</body>
+</html>
