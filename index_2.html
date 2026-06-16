@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WK 2026 Voorspelpoule</title>
+<style>
+  :root{
+    --bg:#0b1f17;
+    --panel:#11281d;
+    --panel2:#15301f;
+    --line:#2a4a35;
+    --accent:#ffb703;
+    --accent2:#3ddc84;
+    --text:#eef5ee;
+    --muted:#9ab6a4;
+    --red:#e85d4e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(180deg,#0b1f17 0%, #0e2419 100%);
+    color:var(--text);
+    padding-bottom:60px;
+  }
+  header{
+    padding:22px 16px 14px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+    position:sticky;
+    top:0;
+    background:#0b1f17ee;
+    backdrop-filter:blur(6px);
+    z-index:10;
+  }
+  header h1{
+    margin:0;
+    font-size:1.4rem;
+    letter-spacing:0.04em;
+    font-weight:800;
+  }
+  header h1 span{color:var(--accent);}
+  header p{margin:4px 0 0;color:var(--muted);font-size:0.85rem;}
+
+  .tabs{
+    display:flex;
+    gap:6px;
+    padding:10px 12px;
+    overflow-x:auto;
+    border-bottom:1px solid var(--line);
+    position:sticky;
+    top:62px;
+    background:#0b1f17;
+    z-index:9;
+    -webkit-overflow-scrolling:touch;
+  }
+  .tab{
+    flex:0 0 auto;
+    padding:8px 14px;
+    border-radius:20px;
+    background:var(--panel);
+    color:var(--muted);
+    border:1px solid var(--line);
+    font-size:0.85rem;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .tab.active{
+    background:var(--accent);
+    color:#1a1300;
+    border-color:var(--accent);
+  }
+
+  main{padding:14px 12px;max-width:720px;margin:0 auto;}
+
+  .player-select{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .player-chip{
+    padding:7px 13px;
+    border-radius:18px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--text);
+    font-size:0.85rem;
+    font-weight:600;
+  }
+  .player-chip.active{
+    background:var(--accent2);
+    color:#06251a;
+    border-color:var(--accent2);
+  }
+
+  .group-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    margin-bottom:14px;
+    overflow:hidden;
+  }
+  .group-head{
+    padding:10px 14px;
+    font-weight:800;
+    font-size:0.95rem;
+    background:var(--panel2);
+    border-bottom:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .group-head .teams{
+    color:var(--muted);
+    font-weight:500;
+    font-size:0.75rem;
+  }
+
+  .match{
+    padding:10px 14px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .match:last-child{border-bottom:none;}
+  .match.played{background:rgba(61,220,132,0.05);}
+
+  .match-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:0.7rem;
+    color:var(--muted);
+  }
+  .match-status{
+    font-size:0.65rem;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:10px;
+    background:var(--line);
+  }
+  .match-status.played{
+    background:var(--accent2);
+    color:#06251a;
+  }
+
+  .teams-row{
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    align-items:center;
+    gap:8px;
+  }
+  .team-name{
+    font-weight:700;
+    font-size:0.95rem;
+  }
+  .team-name.right{text-align:right;}
+
+  .score-inputs{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    justify-content:center;
+  }
+  .score-inputs input{
+    width:38px;
+    height:38px;
+    text-align:center;
+    font-size:1.1rem;
+    font-weight:800;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:#0b1f17;
+    color:var(--text);
+  }
+  .score-inputs input:focus{
+    outline:none;
+    border-color:var(--accent);
+  }
+  .score-inputs .dash{color:var(--muted);font-weight:700;}
+
+  .actual-row{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
+    font-size:0.8rem;
+    color:var(--muted);
+    flex-wrap:wrap;
+  }
+  .actual-row input{
+    width:34px;
+    height:32px;
+    text-align:center;
+    border-radius:8px;
+    border:1px solid var(--accent2);
+    background:rgba(61,220,132,0.08);
+    color:var(--accent2);
+    font-weight:800;
+    font-size:1rem;
+  }
+  .actual-row .lbl{
+    font-size:0.7rem;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+
+  .status-line{
+    text-align:center;
+    font-size:0.72rem;
+    font-weight:700;
+    min-height:16px;
+  }
+  .status-line.idle{color:var(--muted);font-weight:500;}
+  .status-line.incomplete{color:var(--accent);}
+  .status-line.pending{color:var(--muted);}
+  .status-line.saved{color:var(--accent2);}
+  .status-line.error{color:var(--red);}
+  .status-retry-btn{
+    margin-left:6px;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+
+  .confirm-row{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+    font-size:0.78rem;
+    color:var(--red);
+    background:rgba(232,93,78,0.08);
+    border:1px solid var(--red);
+    border-radius:8px;
+    padding:8px;
+  }
+  .confirm-row button{
+    padding:5px 12px;
+    border-radius:8px;
+    border:none;
+    font-weight:700;
+    font-size:0.75rem;
+  }
+  .confirm-yes{background:var(--red);color:#fff;}
+  .confirm-no{background:var(--line);color:var(--text);}
+
+  .points-pill{
+    align-self:center;
+    font-size:0.7rem;
+    font-weight:800;
+    padding:2px 10px;
+    border-radius:10px;
+    background:var(--accent);
+    color:#1a1300;
+  }
+  .points-pill.zero{
+    background:var(--line);
+    color:var(--muted);
+  }
+
+  /* Leaderboard */
+  .lb-table{
+    width:100%;
+    border-collapse:collapse;
+    background:var(--panel);
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .lb-table th, .lb-table td{
+    padding:10px 12px;
+    text-align:left;
+    font-size:0.9rem;
+  }
+  .lb-table th{
+    background:var(--panel2);
+    color:var(--muted);
+    font-size:0.7rem;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+  .lb-table tr:not(:last-child) td{border-bottom:1px solid var(--line);}
+  .lb-table td.points{font-weight:800;color:var(--accent);text-align:right;}
+  .lb-table td.rank{color:var(--muted);font-weight:800;width:30px;}
+  .lb-table tr.you td{background:rgba(255,183,3,0.08);}
+
+  .rules-box{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px;
+    margin-bottom:14px;
+    font-size:0.85rem;
+    line-height:1.6;
+    color:var(--muted);
+  }
+  .rules-box b{color:var(--text);}
+  .rules-box ul{margin:6px 0 0;padding-left:20px;}
+
+  .legend{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    font-size:0.75rem;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .legend span{display:flex;align-items:center;gap:5px;}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .dot.green{background:var(--accent2);}
+  .dot.gold{background:var(--accent);}
+
+  .empty{
+    text-align:center;
+    color:var(--muted);
+    padding:30px 10px;
+    font-size:0.9rem;
+  }
+
+  .save-toast{
+    position:fixed;
+    bottom:16px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--accent2);
+    color:#06251a;
+    padding:8px 18px;
+    border-radius:20px;
+    font-weight:700;
+    font-size:0.8rem;
+    opacity:0;
+    transition:all 0.25s ease;
+    pointer-events:none;
+    max-width:90%;
+    text-align:center;
+    z-index:50;
+  }
+  .save-toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+
+  .manage-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .manage-row input{
+    flex:1;
+    padding:9px 12px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    color:var(--text);
+    font-size:0.9rem;
+  }
+  .manage-row button{
+    padding:9px 16px;
+    border-radius:10px;
+    border:none;
+    background:var(--accent);
+    color:#1a1300;
+    font-weight:700;
+    font-size:0.9rem;
+  }
+  .player-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 14px;
+    margin-bottom:8px;
+  }
+  .player-row .remove{
+    color:var(--red);
+    font-weight:700;
+    font-size:0.8rem;
+    white-space:nowrap;
+    margin-left:8px;
+  }
+  .pending-banner{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 14px;
+    margin-bottom:14px;
+    border-radius:14px;
+    background:rgba(232,93,78,0.1);
+    border:1px solid var(--red);
+    font-size:0.82rem;
+  }
+  .pending-banner b{color:var(--red);}
+  .pending-banner .retry-link{
+    color:var(--accent);
+    font-weight:700;
+    cursor:pointer;
+    font-size:0.8rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>WK <span>2026</span> Voorspelpoule</h1>
+  <p id="subhead">Groepsfase &middot; voorspellingen per speler</p>
+</header>
+
+<div class="tabs" id="tabs"></div>
+
+<main id="main"></main>
+
+<div class="save-toast" id="toast">Opgeslagen ✓</div>
+
+<script>
+const APP_VERSION = 2;
+
+/* ---------- CONFIG ---------- */
+const CONFIG = {
+  API_URL: "https://script.google.com/macros/s/AKfycbywc8cRFhuJsFiCfwz-TeXU_UOwSkTW57frUBCoSu6EtIx17fNP_3ypYO0lYsavcUy5/exec"
+};
+
+/* ---------- DATA: groepsfase WK 2026 (alle 72 wedstrijden) ---------- */
+const MATCHES = [
+  // Groep A
+  {id:"A1", group:"A", date:"11 jun", time:"21:00", home:"Mexico", away:"Zuid-Afrika", actual:[2,0]},
+  {id:"A2", group:"A", date:"12 jun", time:"04:00", home:"Zuid-Korea", away:"Tsjechië", actual:[2,1]},
+  {id:"A3", group:"A", date:"18 jun", time:"18:00", home:"Tsjechië", away:"Zuid-Afrika", actual:null},
+  {id:"A4", group:"A", date:"19 jun", time:"03:00", home:"Mexico", away:"Zuid-Korea", actual:null},
+  {id:"A5", group:"A", date:"25 jun", time:"03:00", home:"Tsjechië", away:"Mexico", actual:null},
+  {id:"A6", group:"A", date:"25 jun", time:"03:00", home:"Zuid-Afrika", away:"Zuid-Korea", actual:null},
+  // Groep B
+  {id:"B1", group:"B", date:"12 jun", time:"21:00", home:"Canada", away:"Bosnië & Herzegovina", actual:[1,1]},
+  {id:"B2", group:"B", date:"13 jun", time:"21:00", home:"Qatar", away:"Zwitserland", actual:null},
+  {id:"B3", group:"B", date:"18 jun", time:"21:00", home:"Zwitserland", away:"Bosnië & Herzegovina", actual:null},
+  {id:"B4", group:"B", date:"19 jun", time:"00:00", home:"Canada", away:"Qatar", actual:null},
+  {id:"B5", group:"B", date:"24 jun", time:"21:00", home:"Zwitserland", away:"Canada", actual:null},
+  {id:"B6", group:"B", date:"24 jun", time:"21:00", home:"Bosnië & Herzegovina", away:"Qatar", actual:null},
+  // Groep C
+  {id:"C1", group:"C", date:"14 jun", time:"00:00", home:"Brazilië", away:"Marokko", actual:null},
+  {id:"C2", group:"C", date:"14 jun", time:"03:00", home:"Haïti", away:"Schotland", actual:null},
+  {id:"C3", group:"C", date:"20 jun", time:"00:00", home:"Schotland", away:"Marokko", actual:null},
+  {id:"C4", group:"C", date:"20 jun", time:"02:30", home:"Brazilië", away:"Haïti", actual:null},
+  {id:"C5", group:"C", date:"25 jun", time:"00:00", home:"Schotland", away:"Brazilië", actual:null},
+  {id:"C6", group:"C", date:"25 jun", time:"00:00", home:"Marokko", away:"Haïti", actual:null},
+  // Groep D
+  {id:"D1", group:"D", date:"13 jun", time:"03:00", home:"Verenigde Staten", away:"Paraguay", actual:[4,1]},
+  {id:"D2", group:"D", date:"14 jun", time:"06:00", home:"Australië", away:"Turkije", actual:null},
+  {id:"D3", group:"D", date:"20 jun", time:"05:00", home:"Turkije", away:"Paraguay", actual:null},
+  {id:"D4", group:"D", date:"19 jun", time:"21:00", home:"Verenigde Staten", away:"Australië", actual:null},
+  {id:"D5", group:"D", date:"26 jun", time:"04:00", home:"Turkije", away:"Verenigde Staten", actual:null},
+  {id:"D6", group:"D", date:"26 jun", time:"04:00", home:"Paraguay", away:"Australië", actual:null},
+  // Groep E
+  {id:"E1", group:"E", date:"14 jun", time:"19:00", home:"Duitsland", away:"Curaçao", actual:null},
+  {id:"E2", group:"E", date:"15 jun", time:"01:00", home:"Ivoorkust", away:"Ecuador", actual:null},
+  {id:"E3", group:"E", date:"20 jun", time:"22:00", home:"Duitsland", away:"Ivoorkust", actual:null},
+  {id:"E4", group:"E", date:"21 jun", time:"02:00", home:"Ecuador", away:"Curaçao", actual:null},
+  {id:"E5", group:"E", date:"25 jun", time:"22:00", home:"Ecuador", away:"Duitsland", actual:null},
+  {id:"E6", group:"E", date:"25 jun", time:"22:00", home:"Curaçao", away:"Ivoorkust", actual:null},
+  // Groep F
+  {id:"F1", group:"F", date:"14 jun", time:"22:00", home:"Nederland", away:"Japan", actual:null},
+  {id:"F2", group:"F", date:"15 jun", time:"04:00", home:"Zweden", away:"Tunesië", actual:null},
+  {id:"F3", group:"F", date:"21 jun", time:"06:00", home:"Tunesië", away:"Japan", actual:null},
+  {id:"F4", group:"F", date:"20 jun", time:"19:00", home:"Nederland", away:"Zweden", actual:null},
+  {id:"F5", group:"F", date:"26 jun", time:"01:00", home:"Japan", away:"Zweden", actual:null},
+  {id:"F6", group:"F", date:"26 jun", time:"01:00", home:"Tunesië", away:"Nederland", actual:null},
+  // Groep G
+  {id:"G1", group:"G", date:"15 jun", time:"21:00", home:"België", away:"Egypte", actual:null},
+  {id:"G2", group:"G", date:"16 jun", time:"03:00", home:"Iran", away:"Nieuw-Zeeland", actual:null},
+  {id:"G3", group:"G", date:"21 jun", time:"21:00", home:"België", away:"Iran", actual:null},
+  {id:"G4", group:"G", date:"22 jun", time:"03:00", home:"Nieuw-Zeeland", away:"Egypte", actual:null},
+  {id:"G5", group:"G", date:"27 jun", time:"05:00", home:"Egypte", away:"Iran", actual:null},
+  {id:"G6", group:"G", date:"27 jun", time:"05:00", home:"Nieuw-Zeeland", away:"België", actual:null},
+  // Groep H
+  {id:"H1", group:"H", date:"15 jun", time:"18:00", home:"Spanje", away:"Kaapverdië", actual:null},
+  {id:"H2", group:"H", date:"16 jun", time:"00:00", home:"Saoedi-Arabië", away:"Uruguay", actual:null},
+  {id:"H3", group:"H", date:"21 jun", time:"18:00", home:"Spanje", away:"Saoedi-Arabië", actual:null},
+  {id:"H4", group:"H", date:"22 jun", time:"00:00", home:"Uruguay", away:"Kaapverdië", actual:null},
+  {id:"H5", group:"H", date:"27 jun", time:"02:00", home:"Kaapverdië", away:"Saoedi-Arabië", actual:null},
+  {id:"H6", group:"H", date:"27 jun", time:"02:00", home:"Uruguay", away:"Spanje", actual:null},
+  // Groep I
+  {id:"I1", group:"I", date:"16 jun", time:"21:00", home:"Frankrijk", away:"Senegal", actual:null},
+  {id:"I2", group:"I", date:"17 jun", time:"00:00", home:"Irak", away:"Noorwegen", actual:null},
+  {id:"I3", group:"I", date:"22 jun", time:"23:00", home:"Frankrijk", away:"Irak", actual:null},
+  {id:"I4", group:"I", date:"23 jun", time:"02:00", home:"Noorwegen", away:"Senegal", actual:null},
+  {id:"I5", group:"I", date:"26 jun", time:"21:00", home:"Noorwegen", away:"Frankrijk", actual:null},
+  {id:"I6", group:"I", date:"26 jun", time:"21:00", home:"Senegal", away:"Irak", actual:null},
+  // Groep J
+  {id:"J1", group:"J", date:"17 jun", time:"03:00", home:"Argentinië", away:"Algerije", actual:null},
+  {id:"J2", group:"J", date:"17 jun", time:"06:00", home:"Oostenrijk", away:"Jordanië", actual:null},
+  {id:"J3", group:"J", date:"22 jun", time:"19:00", home:"Argentinië", away:"Oostenrijk", actual:null},
+  {id:"J4", group:"J", date:"23 jun", time:"05:00", home:"Jordanië", away:"Algerije", actual:null},
+  {id:"J5", group:"J", date:"28 jun", time:"04:00", home:"Algerije", away:"Oostenrijk", actual:null},
+  {id:"J6", group:"J", date:"28 jun", time:"04:00", home:"Jordanië", away:"Argentinië", actual:null},
+  // Groep K
+  {id:"K1", group:"K", date:"17 jun", time:"19:00", home:"Portugal", away:"DR Congo", actual:null},
+  {id:"K2", group:"K", date:"18 jun", time:"04:00", home:"Oezbekistan", away:"Colombia", actual:null},
+  {id:"K3", group:"K", date:"23 jun", time:"19:00", home:"Portugal", away:"Oezbekistan", actual:null},
+  {id:"K4", group:"K", date:"24 jun", time:"04:00", home:"Colombia", away:"DR Congo", actual:null},
+  {id:"K5", group:"K", date:"28 jun", time:"01:30", home:"Colombia", away:"Portugal", actual:null},
+  {id:"K6", group:"K", date:"28 jun", time:"01:30", home:"DR Congo", away:"Oezbekistan", actual:null},
+  // Groep L
+  {id:"L1", group:"L", date:"17 jun", time:"22:00", home:"Engeland", away:"Kroatië", actual:null},
+  {id:"L2", group:"L", date:"18 jun", time:"01:00", home:"Ghana", away:"Panama", actual:null},
+  {id:"L3", group:"L", date:"23 jun", time:"22:00", home:"Engeland", away:"Ghana", actual:null},
+  {id:"L4", group:"L", date:"24 jun", time:"01:00", home:"Panama", away:"Kroatië", actual:null},
+  {id:"L5", group:"L", date:"27 jun", time:"23:00", home:"Panama", away:"Engeland", actual:null},
+  {id:"L6", group:"L", date:"27 jun", time:"23:00", home:"Kroatië", away:"Ghana", actual:null},
+];
+
+/* ---------- KNOCK-OUTFASE (placeholders, in te vullen zodra bekend) ---------- */
+const KNOCKOUT_MATCHES = [
+  {id:"KO1", round:"16e finales", date:"28 jun", time:"21:00", placeholder:"Nummer 2 Poule A - Nummer 2 Poule B"},
+  {id:"KO2", round:"16e finales", date:"29 jun", time:"19:00", placeholder:"Winnaar Poule C - Nummer 2 Poule F"},
+  {id:"KO3", round:"16e finales", date:"29 jun", time:"22:30", placeholder:"Winnaar Poule E - Nummer 3 Poule AB/C/D/F"},
+  {id:"KO4", round:"16e finales", date:"30 jun", time:"03:00", placeholder:"Winnaar Poule F - Nummer 2 Poule C"},
+  {id:"KO5", round:"16e finales", date:"30 jun", time:"19:00", placeholder:"Nummer 2 Poule E - Nummer 2 Poule I"},
+  {id:"KO6", round:"16e finales", date:"30 jun", time:"23:00", placeholder:"Winnaar Poule I - Nummer 3 Poule C/D/F/G/H"},
+  {id:"KO7", round:"16e finales", date:"1 jul", time:"03:00", placeholder:"Winnaar Poule A - Nummer 3 Poule C/E/F/H/I"},
+  {id:"KO8", round:"16e finales", date:"1 jul", time:"18:00", placeholder:"Winnaar Poule L - Nummer 3 Poule E/H/I/J/K"},
+  {id:"KO9", round:"16e finales", date:"1 jul", time:"22:00", placeholder:"Winnaar Poule G - Nummer 3 Poule A/E/H/I/J"},
+  {id:"KO10", round:"16e finales", date:"2 jul", time:"02:00", placeholder:"Winnaar Poule D - Nummer 3 Poule B/E/F/I/J"},
+  {id:"KO11", round:"16e finales", date:"2 jul", time:"21:00", placeholder:"Winnaar Poule H - Nummer 2 Poule J"},
+  {id:"KO12", round:"16e finales", date:"3 jul", time:"01:00", placeholder:"Nummer 2 Poule K - Nummer 2 Poule L"},
+  {id:"KO13", round:"16e finales", date:"3 jul", time:"05:00", placeholder:"Winnaar Poule B - Nummer 3 Poule E/F/G/I/J"},
+  {id:"KO14", round:"16e finales", date:"3 jul", time:"20:00", placeholder:"Nummer 2 Poule D - Nummer 2 Poule G"},
+  {id:"KO15", round:"16e finales", date:"4 jul", time:"00:00", placeholder:"Winnaar Poule J - Nummer 2 Poule H"},
+  {id:"KO16", round:"16e finales", date:"4 jul", time:"03:30", placeholder:"Winnaar Poule K - Nummer 3 Poule D/E/I/J/L"},
+  {id:"KO17", round:"8e finales", date:"4 jul", time:"19:00", placeholder:"Winnaar duel 73 - Winnaar duel 75"},
+  {id:"KO18", round:"8e finales", date:"4 jul", time:"23:00", placeholder:"Winnaar duel 74 - Winnaar duel 77"},
+  {id:"KO19", round:"8e finales", date:"5 jul", time:"22:00", placeholder:"Winnaar duel 76 - Winnaar duel 78"},
+  {id:"KO20", round:"8e finales", date:"6 jul", time:"02:00", placeholder:"Winnaar duel 79 - Winnaar duel 80"},
+  {id:"KO21", round:"8e finales", date:"6 jul", time:"21:00", placeholder:"Winnaar duel 83 - Winnaar duel 84"},
+  {id:"KO22", round:"8e finales", date:"7 jul", time:"02:00", placeholder:"Winnaar duel 81 - Winnaar duel 82"},
+  {id:"KO23", round:"8e finales", date:"7 jul", time:"18:00", placeholder:"Winnaar duel 86 - Winnaar duel 88"},
+  {id:"KO24", round:"8e finales", date:"7 jul", time:"22:00", placeholder:"Winnaar duel 85 - Winnaar duel 87"},
+  {id:"KO25", round:"Kwartfinales", date:"9 jul", time:"22:00", placeholder:"Winnaar duel 89 - Winnaar duel 90"},
+  {id:"KO26", round:"Kwartfinales", date:"10 jul", time:"21:00", placeholder:"Winnaar duel 93 - Winnaar duel 94"},
+  {id:"KO27", round:"Kwartfinales", date:"11 jul", time:"23:00", placeholder:"Winnaar duel 91 - Winnaar duel 92"},
+  {id:"KO28", round:"Kwartfinales", date:"12 jul", time:"03:00", placeholder:"Winnaar duel 95 - Winnaar duel 96"},
+  {id:"KO29", round:"Halve finales", date:"14 jul", time:"21:00", placeholder:"Winnaar duel 97 - Winnaar duel 98"},
+  {id:"KO30", round:"Halve finales", date:"15 jul", time:"21:00", placeholder:"Winnaar duel 99 - Winnaar duel 100"},
+  {id:"KO31", round:"Troostfinale", date:"18 jul", time:"23:00", placeholder:"Verliezer duel 101 - Verliezer duel 102"},
+  {id:"KO32", round:"Finale", date:"19 jul", time:"21:00", placeholder:"Winnaar duel 101 - Winnaar duel 102"},
+];
+
+const GROUP_TEAMS = {
+  A:["Mexico","Zuid-Afrika","Zuid-Korea","Tsjechië"],
+  B:["Canada","Bosnië & Herzegovina","Qatar","Zwitserland"],
+  C:["Brazilië","Marokko","Haïti","Schotland"],
+  D:["Verenigde Staten","Paraguay","Australië","Turkije"],
+  E:["Duitsland","Curaçao","Ivoorkust","Ecuador"],
+  F:["Nederland","Japan","Zweden","Tunesië"],
+  G:["België","Egypte","Iran","Nieuw-Zeeland"],
+  H:["Spanje","Kaapverdië","Saoedi-Arabië","Uruguay"],
+  I:["Frankrijk","Senegal","Irak","Noorwegen"],
+  J:["Argentinië","Algerije","Oostenrijk","Jordanië"],
+  K:["Portugal","DR Congo","Oezbekistan","Colombia"],
+  L:["Engeland","Kroatië","Ghana","Panama"],
+};
+
+/* ---------- TIME / LOCKING ---------- */
+const MONTH_MAP = {jun:"06", jul:"07"};
+function kickoffUTCMillis(m){
+  const parts = m.date.split(" ");
+  const day = parts[0].padStart(2,"0");
+  const month = MONTH_MAP[parts[1]];
+  const offsetHours = 2; // CEST geldt voor alle WK 2026 data (jun-jul)
+  const iso = `2026-${month}-${day}T${m.time}:00`;
+  const localMillis = Date.parse(iso + "Z");
+  return localMillis - offsetHours*3600*1000;
+}
+function isLocked(m){
+  if(getActual(m)) return true;
+  return Date.now() >= kickoffUTCMillis(m);
+}
+function isKOLocked(m){
+  if(getActual(m)) return true;
+  return Date.now() >= kickoffUTCMillis(m);
+}
+
+/* ---------- STATE ---------- */
+let state = {
+  players: ["Jij"],
+  current: "Jij",
+  predictions: {},
+  actuals: {},
+  koTeams: {},
+  archivedPredictions: {},
+  editingActual: null,
+  editingTeams: null,
+  view: "groep",
+  activeGroup: "F",
+  queue: [],          // wachtrij van nog niet bevestigde server-acties
+  serverAppVersion: null,
+};
+
+// matchUI: ephemeral lokale concept-status per wedstrijd, NOOIT door
+// synchronisatie overschreven. Dit is de bron van waarheid tijdens het typen.
+// matchUI[matchId] = { h, a, status: 'idle'|'incomplete'|'pending'|'saved'|'error'|'confirm-delete', errorMsg }
+const matchUI = {};
+
+const STORAGE_KEY_LOCAL_NAME = "wkpool-local-v1";
+const QUEUE_KEY = "wkpool-queue-v1";
+const RETRY_DELAYS = [2000, 5000, 15000, 30000];
+const saveTimers = {};
+
+let lastSyncError = null;
+
+/* ---------- LOCAL NAME (per toestel) ---------- */
+function loadLocalName(){
+  return new Promise(resolve=>{
+    try{
+      const v = localStorage.getItem(STORAGE_KEY_LOCAL_NAME);
+      resolve(v || null);
+    }catch(e){
+      resolve(null);
+    }
+  });
+}
+function saveLocalName(name){
+  try{ localStorage.setItem(STORAGE_KEY_LOCAL_NAME, name); }catch(e){}
+}
+
+/* ---------- QUEUE (wachtrij voor mislukte/lopende opslag) ---------- */
+function persistQueue(){
+  try{
+    const simplified = state.queue.map(q=>({id:q.id, action:q.action, payload:q.payload, attempts:q.attempts||0}));
+    localStorage.setItem(QUEUE_KEY, JSON.stringify(simplified));
+  }catch(e){}
+}
+
+function loadQueueFromStorage(){
+  try{
+    const raw = localStorage.getItem(QUEUE_KEY);
+    if(!raw) return [];
+    const parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed)) return [];
+    return parsed.map(rehydrateQueueItem);
+  }catch(e){
+    return [];
+  }
+}
+
+// Bouwt generieke success/error-handlers op basis van de actie, zodat een
+// wachtrij-item ook na het herladen van de pagina (app gesloten/herstart)
+// nog correct kan worden afgehandeld.
+function rehydrateQueueItem(raw){
+  const item = { id: raw.id, action: raw.action, payload: raw.payload, attempts: raw.attempts||0, status: "error" };
+  attachGenericCallbacks(item);
+  return item;
+}
+
+function attachGenericCallbacks(item){
+  item.onSuccess = function(){
+    applyConfirmedChange(item.action, item.payload);
+    if(item.action === "savePrediction" || item.action === "deletePrediction"){
+      const mid = item.payload.matchId;
+      if(matchUI[mid]){ matchUI[mid].status = "saved"; updateStatusLineDOM(mid); }
+    }
+    render();
+  };
+  item.onError = function(errMsg){
+    if(item.action === "savePrediction" || item.action === "deletePrediction"){
+      const mid = item.payload.matchId;
+      if(matchUI[mid]){ matchUI[mid].status = "error"; matchUI[mid].errorMsg = errMsg; updateStatusLineDOM(mid); }
+    }
+  };
+}
+
+function applyConfirmedChange(action, payload){
+  if(action === "savePrediction"){
+    if(!state.predictions[payload.player]) state.predictions[payload.player] = {};
+    state.predictions[payload.player][payload.matchId] = payload.score;
+  } else if(action === "deletePrediction"){
+    if(state.predictions[payload.player]) delete state.predictions[payload.player][payload.matchId];
+  } else if(action === "saveActual"){
+    if(!state.actuals) state.actuals = {};
+    state.actuals[payload.matchId] = payload.score;
+  } else if(action === "saveTeams"){
+    if(!state.koTeams) state.koTeams = {};
+    state.koTeams[payload.matchId] = payload.teams;
+  } else if(action === "addPlayer"){
+    if(!state.players.includes(payload.name)) state.players.push(payload.name);
+  } else if(action === "renamePlayer"){
+    state.players = state.players.map(p=>p===payload.oldName?payload.newName:p);
+    if(state.predictions[payload.oldName]){
+      state.predictions[payload.newName] = state.predictions[payload.oldName];
+      delete state.predictions[payload.oldName];
+    }
+    if(state.current===payload.oldName){ state.current = payload.newName; saveLocalName(payload.newName); }
+  } else if(action === "removePlayer"){
+    state.players = state.players.filter(p=>p!==payload.name);
+    if(state.predictions[payload.name]){
+      if(!state.archivedPredictions) state.archivedPredictions = {};
+      state.archivedPredictions[payload.name] = state.predictions[payload.name];
+      delete state.predictions[payload.name];
+    }
+  }
+}
+
+function queueAndSend(action, payload, opts){
+  opts = opts || {};
+  const id = "q" + Date.now() + Math.random().toString(36).slice(2,8);
+  const item = { id, action, payload, attempts:0, status:"sending" };
+  attachGenericCallbacks(item);
+  if(opts.onSuccessExtra) { const base = item.onSuccess; item.onSuccess = function(){ base(); opts.onSuccessExtra(); }; }
+  if(opts.onErrorExtra) { const base = item.onError; item.onError = function(e){ base(e); opts.onErrorExtra(e); }; }
+  state.queue.push(item);
+  persistQueue();
+  attemptQueueItem(item);
+  return item;
+}
+
+function attemptQueueItem(item){
+  if(!CONFIG.API_URL || CONFIG.API_URL.indexOf("http")!==0){
+    handleQueueItemFailure(item, "Geen API URL geconfigureerd");
+    return;
+  }
+  item.status = "sending";
+  fetch(CONFIG.API_URL, {
+    method: "POST",
+    headers: {"Content-Type": "text/plain;charset=utf-8"},
+    body: JSON.stringify(Object.assign({action: item.action}, item.payload))
+  }).then(r=>{
+    return r.text().then(text=>{
+      let body;
+      try{ body = JSON.parse(text); }catch(e){ body = null; }
+      return { httpOk: r.ok, body };
+    });
+  }).then(({httpOk, body})=>{
+    if(httpOk && body && body.ok === true){
+      removeFromQueue(item.id);
+      lastSyncError = null;
+      if(item.onSuccess) item.onSuccess(body);
+    } else {
+      const errMsg = (body && body.error) ? body.error : ("HTTP " + (httpOk ? "ok-maar-geen-bevestiging" : "fout"));
+      handleQueueItemFailure(item, errMsg);
+    }
+  }).catch(err=>{
+    handleQueueItemFailure(item, err.message);
+  });
+}
+
+function handleQueueItemFailure(item, errMsg){
+  item.attempts = (item.attempts||0) + 1;
+  item.lastError = errMsg;
+  item.status = "error";
+  persistQueue();
+  lastSyncError = "Opslaan mislukt: " + errMsg;
+  if(item.onError) item.onError(errMsg);
+  if(item.attempts <= RETRY_DELAYS.length){
+    const delay = RETRY_DELAYS[item.attempts-1];
+    setTimeout(()=>{
+      if(state.queue.find(q=>q.id===item.id)) attemptQueueItem(item);
+    }, delay);
+  }
+  if(document.getElementById("main")) renderPendingBannerIfPresent();
+}
+
+function removeFromQueue(id){
+  state.queue = state.queue.filter(q=>q.id!==id);
+  persistQueue();
+}
+
+function retryAllQueueItems(){
+  state.queue.forEach(item=>attemptQueueItem(item));
+}
+
+/* ---------- LOAD (GET) ---------- */
+function isValidServerShape(data){
+  return data && typeof data === "object" &&
+    Array.isArray(data.players) &&
+    typeof data.predictions === "object" &&
+    typeof data.actuals === "object" &&
+    typeof data.koTeams === "object";
+}
+
+function loadState(){
+  return new Promise(resolve=>{
+    if(!CONFIG.API_URL || CONFIG.API_URL.indexOf("http")!==0){
+      resolve();
+      return;
+    }
+    fetch(CONFIG.API_URL)
+      .then(r=>{
+        if(!r.ok) throw new Error("HTTP "+r.status);
+        return r.json();
+      })
+      .then(data=>{
+        if(!isValidServerShape(data)){
+          lastSyncError = "Server gaf onverwachte data terug (genegeerd, lokale data behouden)";
+          resolve();
+          return;
+        }
+        state.players = data.players;
+        state.predictions = data.predictions;
+        state.actuals = data.actuals;
+        state.koTeams = data.koTeams;
+        state.archivedPredictions = data.archivedPredictions || {};
+        state.serverAppVersion = data.appVersion || null;
+        lastSyncError = null;
+        resolve();
+      })
+      .catch(err=>{
+        lastSyncError = "Laden mislukt: " + err.message;
+        resolve();
+      });
+  });
+}
+
+let toastTimer=null;
+function showToast(text, isError){
+  const t = document.getElementById("toast");
+  t.textContent = text;
+  t.style.background = isError ? "var(--red)" : "var(--accent2)";
+  t.style.color = isError ? "#fff" : "#06251a";
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove("show"), isError?3000:1300);
+}
+
+function getActual(m){
+  const override = state.actuals && state.actuals[m.id];
+  if(override) return override;
+  return m.actual;
+}
+
+// 5 punten: exacte uitslag / 3 punten: juist verschil / 1 punt: juiste uitkomst / 0: fout
+function calcPoints(pred, actual){
+  if(!pred || !actual) return null;
+  const [ph,pa] = pred;
+  const [ah,aa] = actual;
+  if(ph===""||pa===""||ph===null||pa===null||ph===undefined||pa===undefined) return null;
+  const PH=Number(ph), PA=Number(pa), AH=Number(ah), AA=Number(aa);
+  if(isNaN(PH)||isNaN(PA)) return null;
+  if(PH===AH && PA===AA) return 5;
+  const predDiff = PH-PA;
+  const actDiff = AH-AA;
+  const predOutcome = Math.sign(predDiff);
+  const actOutcome = Math.sign(actDiff);
+  if(predOutcome!==actOutcome) return 0;
+  if(predDiff===actDiff) return 3;
+  return 1;
+}
+
+function getPred(player, matchId){
+  const p = state.predictions[player];
+  if(!p) return [null,null];
+  return p[matchId] || [null,null];
+}
+
+/* ---------- MATCH UI (de kern van de bugfix) ----------
+   matchUI houdt de lokale concept-waarden bij tijdens het typen.
+   Dit object wordt NOOIT door synchronisatie (polling) overschreven,
+   dus een binnenkomende update van een andere speler kan nooit
+   verwijderen wat jij net aan het invullen bent.
+*/
+function ensureMatchUI(matchId, player){
+  if(!matchUI[matchId]){
+    const saved = getPred(player, matchId);
+    matchUI[matchId] = { h: saved[0]===null?"":String(saved[0]), a: saved[1]===null?"":String(saved[1]), status:"idle", errorMsg:null };
+  }
+  return matchUI[matchId];
+}
+
+function getDisplayValue(matchId, idx, player){
+  if(matchUI[matchId]){
+    return idx===0 ? matchUI[matchId].h : matchUI[matchId].a;
+  }
+  const saved = getPred(player, matchId);
+  return saved[idx]===null||saved[idx]===undefined ? "" : String(saved[idx]);
+}
+
+function statusLabel(ui){
+  if(!ui) return "";
+  if(ui.status==="idle") return "";
+  if(ui.status==="incomplete") return "Vul beide scores in";
+  if(ui.status==="pending") return "Opslaan…";
+  if(ui.status==="saved") return "Opgeslagen ✓";
+  if(ui.status==="error") return "Fout — " + (ui.errorMsg||"onbekend") ;
+  if(ui.status==="confirm-delete") return "";
+  return "";
+}
+
+function updateStatusLineDOM(matchId){
+  const el = document.querySelector(`[data-statusline="${matchId}"]`);
+  if(!el) return; // gebruiker heeft mogelijk de wedstrijdlijst verlaten, geen probleem
+  const ui = matchUI[matchId];
+  if(!ui){ el.innerHTML = ""; el.className = "status-line"; return; }
+
+  if(ui.status === "confirm-delete"){
+    el.className = "status-line";
+    el.innerHTML = `<span class="confirm-row">Voorspelling verwijderen?
+      <button class="confirm-yes" data-confirmdel="${matchId}">Ja, verwijder</button>
+      <button class="confirm-no" data-canceldel="${matchId}">Annuleer</button></span>`;
+    bindStatusLineButtons(matchId);
+    return;
+  }
+
+  el.className = "status-line " + ui.status;
+  let html = statusLabel(ui);
+  if(ui.status==="error"){
+    html += `<span class="status-retry-btn" data-retrymatch="${matchId}">opnieuw proberen</span>`;
+  }
+  el.innerHTML = html;
+  bindStatusLineButtons(matchId);
+}
+
+function bindStatusLineButtons(matchId){
+  const el = document.querySelector(`[data-statusline="${matchId}"]`);
+  if(!el) return;
+  const retryBtn = el.querySelector(`[data-retrymatch="${matchId}"]`);
+  if(retryBtn) retryBtn.onclick = ()=> retryMatchSave(matchId);
+  const yesBtn = el.querySelector(`[data-confirmdel="${matchId}"]`);
+  if(yesBtn) yesBtn.onclick = ()=> confirmDeletePrediction(matchId);
+  const noBtn = el.querySelector(`[data-canceldel="${matchId}"]`);
+  if(noBtn) noBtn.onclick = ()=> cancelDeletePrediction(matchId);
+}
+
+function retryMatchSave(matchId){
+  const ui = matchUI[matchId];
+  if(!ui) return;
+  const existing = state.queue.find(q=> (q.action==="savePrediction"||q.action==="deletePrediction") && q.payload.matchId===matchId);
+  if(existing){ attemptQueueItem(existing); ui.status="pending"; updateStatusLineDOM(matchId); return; }
+  scheduleAutoSave(matchId, true);
+}
+
+// Wordt aangeroepen bij elke "input" event op een scorevakje.
+function handleScoreInput(matchId, idx, rawValue){
+  const player = state.current;
+  const ui = ensureMatchUI(matchId, player);
+  const cleaned = rawValue.replace(/[^0-9]/g, "").slice(0,2);
+  if(idx===0) ui.h = cleaned; else ui.a = cleaned;
+  ui.status = "idle";
+  scheduleAutoSave(matchId, false);
+}
+
+function scheduleAutoSave(matchId, immediate){
+  clearTimeout(saveTimers[matchId]);
+  const run = ()=> evaluateAndSave(matchId);
+  if(immediate) run();
+  else saveTimers[matchId] = setTimeout(run, 600);
+}
+
+function evaluateAndSave(matchId){
+  const player = state.current;
+  const ui = matchUI[matchId];
+  if(!ui) return;
+  const hRaw = ui.h, aRaw = ui.a;
+  const hasH = hRaw !== "" && hRaw !== null && hRaw !== undefined;
+  const hasA = aRaw !== "" && aRaw !== null && aRaw !== undefined;
+  const savedPred = getPred(player, matchId);
+  const hadSaved = savedPred[0] !== null && savedPred[1] !== null;
+
+  if(!hasH && !hasA){
+    if(hadSaved){
+      ui.status = "confirm-delete";
+      updateStatusLineDOM(matchId);
+    } else {
+      ui.status = "idle";
+      updateStatusLineDOM(matchId);
+    }
+    return;
+  }
+  if(!hasH || !hasA){
+    ui.status = "incomplete";
+    updateStatusLineDOM(matchId);
+    return;
+  }
+  const h = Number(hRaw), a = Number(aRaw);
+  if(!Number.isInteger(h) || !Number.isInteger(a) || h<0 || a<0){
+    ui.status = "incomplete";
+    updateStatusLineDOM(matchId);
+    return;
+  }
+  // Beide velden geldig gevuld -> nu pas centraal opslaan.
+  ui.status = "pending";
+  updateStatusLineDOM(matchId);
+  queueAndSend("savePrediction", { player, matchId, score:[h,a] });
+}
+
+function confirmDeletePrediction(matchId){
+  const player = state.current;
+  const ui = matchUI[matchId];
+  if(!ui) return;
+  ui.status = "pending";
+  updateStatusLineDOM(matchId);
+  queueAndSend("deletePrediction", { player, matchId }, {
+    onSuccessExtra: ()=>{ ui.h=""; ui.a=""; }
+  });
+}
+
+function cancelDeletePrediction(matchId){
+  const player = state.current;
+  const saved = getPred(player, matchId);
+  const ui = matchUI[matchId];
+  if(!ui) return;
+  ui.h = saved[0]===null?"":String(saved[0]);
+  ui.a = saved[1]===null?"":String(saved[1]);
+  ui.status = (saved[0]!==null && saved[1]!==null) ? "saved" : "idle";
+  render();
+}
+
+/* ---------- RENDER ---------- */
+function render(){
+  renderTabs();
+  if(state.view==="groep") renderGroepen();
+  else if(state.view==="knockout") renderKnockout();
+  else if(state.view==="stand") renderStand();
+  else if(state.view==="prijzen") renderPrijzen();
+  else if(state.view==="spelers") renderSpelers();
+  else if(state.view==="regels") renderRegels();
+}
+
+function renderTabs(){
+  const tabs = document.getElementById("tabs");
+  const items = [
+    {id:"groep", label:"⚽ Groepsfase"},
+    {id:"knockout", label:"🏅 Knock-out"},
+    {id:"stand", label:"🏆 Stand"},
+    {id:"prijzen", label:"🎁 Prijzen"},
+    {id:"spelers", label:"👥 Spelers"},
+    {id:"regels", label:"📋 Regels"},
+  ];
+  tabs.innerHTML = items.map(it=>
+    `<button class="tab ${state.view===it.id?'active':''}" data-tab="${it.id}">${it.label}</button>`
+  ).join("");
+  tabs.querySelectorAll(".tab").forEach(btn=>{
+    btn.onclick = ()=>{ state.view = btn.dataset.tab; render(); };
+  });
+}
+
+function renderCurrentUserBar(){
+  let html = `<div class="rules-box" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:10px;">
+    <span>Ingelogd als <b style="color:var(--accent2);">${escapeHtml(state.current)}</b></span>
+    <span id="switchUserBtn" style="color:var(--accent);font-weight:700;cursor:pointer;font-size:0.85rem;">Wisselen</span>
+  </div>`;
+  if(state.queue.length>0){
+    html += `<div class="pending-banner">
+      <span><b>${state.queue.length}</b> wijziging${state.queue.length>1?'en':''} nog niet bevestigd door de server</span>
+      <span class="retry-link" id="retryAllBtn">Probeer opnieuw</span>
+    </div>`;
+  }
+  return html;
+}
+
+function renderPendingBannerIfPresent(){
+  // Lichte herrender van alleen de banner-zone is niet nodig zolang we
+  // niet midden in een invoerveld zitten; bij twijfel laten we de volgende
+  // render() dit gewoon meenemen. Hier forceren we een render als de
+  // gebruiker niet actief aan het typen is, zodat de banner verschijnt.
+  const active = document.activeElement;
+  if(active && active.matches && active.matches('input[data-match]')) return;
+  render();
+}
+
+function renderGroepen(){
+  const main = document.getElementById("main");
+  document.getElementById("subhead").textContent = `Groepsfase · voorspelling van ${state.current}`;
+
+  let html = renderCurrentUserBar();
+
+  html += `<div class="legend">
+    <span><span class="dot green"></span> al gespeeld – telt voor iedereen mee</span>
+    <span><span class="dot gold"></span> behaalde punten</span>
+  </div>`;
+
+  html += `<div class="player-select" style="margin-bottom:10px;">`;
+  Object.keys(GROUP_TEAMS).forEach(g=>{
+    html += `<button class="player-chip ${g===state.activeGroup?'active':''}" data-group="${g}">Groep ${g}</button>`;
+  });
+  html += `</div>`;
+
+  const groupMatches = MATCHES.filter(m=>m.group===state.activeGroup);
+  const teams = GROUP_TEAMS[state.activeGroup].join(" · ");
+
+  html += `<div class="group-card">
+    <div class="group-head"><span>Groep ${state.activeGroup}</span><span class="teams">${teams}</span></div>`;
+
+  groupMatches.forEach(m=>{
+    const actual = getActual(m);
+    const played = !!actual;
+    const locked = isLocked(m);
+    const predForPoints = getPred(state.current, m.id);
+    const points = played ? calcPoints(predForPoints, actual) : null;
+    const dv0 = getDisplayValue(m.id, 0, state.current);
+    const dv1 = getDisplayValue(m.id, 1, state.current);
+
+    html += `<div class="match ${played?'played':''}">
+      <div class="match-top">
+        <span>${m.date} · ${m.time}</span>
+        <span class="match-status ${played?'played':''}">${played?'GESPEELD':(locked?'GESLOTEN':'NOG TE SPELEN')}</span>
+      </div>
+      <div class="teams-row">
+        <div class="team-name">${m.home}</div>
+        <div class="score-inputs">
+          <input type="number" min="0" max="20" inputmode="numeric" data-match="${m.id}" data-idx="0" value="${dv0}" ${locked?'disabled':''}>
+          <span class="dash">–</span>
+          <input type="number" min="0" max="20" inputmode="numeric" data-match="${m.id}" data-idx="1" value="${dv1}" ${locked?'disabled':''}>
+        </div>
+        <div class="team-name right">${m.away}</div>
+      </div>
+      ${locked?'':`<div class="status-line" data-statusline="${m.id}"></div>`}`;
+
+    if(!played && locked){
+      html += `<div class="actual-row"><span class="lbl">Voorspelling vergrendeld – wedstrijd is begonnen</span></div>`;
+      html += `<div class="actual-row" style="margin-top:4px;">
+        <span class="lbl">Uitslag invullen:</span>
+        <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="0" value="">
+        <span class="dash">–</span>
+        <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="1" value="">
+        <button class="save-actual-btn" data-saveactual="${m.id}" style="padding:6px 12px;border-radius:8px;border:none;background:var(--accent);color:#1a1300;font-weight:700;font-size:0.75rem;">Opslaan</button>
+      </div>
+      <div class="status-line" data-statusline="actual-${m.id}"></div>`;
+    }
+
+    if(played){
+      html += `<div class="actual-row">
+        <span class="lbl">Uitslag</span>
+        <span style="font-weight:800;color:var(--accent2);font-size:1rem;">${actual[0]} – ${actual[1]}</span>
+        <span class="edit-actual-link" data-editactual="${m.id}" style="color:var(--muted);font-size:0.7rem;text-decoration:underline;margin-left:6px;">wijzig</span>
+      </div>`;
+      if(points!==null){
+        html += `<div class="points-pill ${points===0?'zero':''}">${points} punten</div>`;
+      } else {
+        html += `<div class="points-pill zero">geen voorspelling</div>`;
+      }
+      if(state.editingActual===m.id){
+        html += `<div class="actual-row" style="margin-top:4px;">
+          <span class="lbl">Nieuwe uitslag:</span>
+          <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="0" value="${actual[0]}">
+          <span class="dash">–</span>
+          <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="1" value="${actual[1]}">
+          <button class="save-actual-btn" data-saveactual="${m.id}" style="padding:6px 12px;border-radius:8px;border:none;background:var(--accent);color:#1a1300;font-weight:700;font-size:0.75rem;">Opslaan</button>
+        </div>
+        <div class="status-line" data-statusline="actual-${m.id}"></div>`;
+      }
+    }
+
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+
+  main.innerHTML = html;
+  bindCommonHandlers();
+
+  main.querySelectorAll('[data-group]').forEach(btn=>{
+    btn.onclick = ()=>{ state.activeGroup = btn.dataset.group; render(); };
+  });
+
+  // Initieel de statusregel tonen voor wedstrijden die al een opgeslagen
+  // voorspelling hebben (zodat "Opgeslagen ✓" direct zichtbaar is).
+  groupMatches.forEach(m=>{
+    if(matchUI[m.id]) updateStatusLineDOM(m.id);
+    else {
+      const saved = getPred(state.current, m.id);
+      if(saved[0]!==null && saved[1]!==null){
+        ensureMatchUI(m.id, state.current);
+        matchUI[m.id].status = "saved";
+        updateStatusLineDOM(m.id);
+      }
+    }
+  });
+
+  bindScoreInputs(main);
+  bindActualHandlers(main);
+}
+
+// Cruciaal: "input" event, NOOIT render() binnen deze handler aanroepen.
+// Alleen handleScoreInput + een gerichte DOM-update van de statusregel.
+function bindScoreInputs(main){
+  main.querySelectorAll('input[data-match]').forEach(inp=>{
+    inp.addEventListener("input", ()=>{
+      handleScoreInput(inp.dataset.match, Number(inp.dataset.idx), inp.value);
+    });
+  });
+}
+
+function bindActualHandlers(main){
+  main.querySelectorAll('[data-saveactual]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const mid = btn.dataset.saveactual;
+      const inputs = main.querySelectorAll(`input[data-actual="${mid}"]`);
+      const h = inputs[0].value, a = inputs[1].value;
+      if(h==="" || a===""){ return; }
+      const hN = Number(h), aN = Number(a);
+      if(!Number.isInteger(hN) || !Number.isInteger(aN) || hN<0 || aN<0) return;
+      const statusEl = document.querySelector(`[data-statusline="actual-${mid}"]`);
+      if(statusEl){ statusEl.className="status-line pending"; statusEl.textContent="Opslaan…"; }
+      queueAndSend("saveActual", { matchId: mid, score:[hN,aN] }, {
+        onSuccessExtra: ()=>{ state.editingActual = null; render(); },
+        onErrorExtra: (err)=>{ if(statusEl){ statusEl.className="status-line error"; statusEl.textContent="Fout — "+err; } }
+      });
+    };
+  });
+
+  main.querySelectorAll('[data-editactual]').forEach(el=>{
+    el.onclick = ()=>{
+      state.editingActual = (state.editingActual===el.dataset.editactual) ? null : el.dataset.editactual;
+      render();
+    };
+  });
+}
+
+function bindCommonHandlers(){
+  const sw = document.getElementById("switchUserBtn");
+  if(sw) sw.onclick = ()=>{ renderLogin(); };
+  const retryAll = document.getElementById("retryAllBtn");
+  if(retryAll) retryAll.onclick = ()=>{ retryAllQueueItems(); };
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function escapeAttr(s){ return escapeHtml(s); }
+
+/* ---------- KNOCKOUT ---------- */
+function renderKnockout(){
+  const main = document.getElementById("main");
+  document.getElementById("subhead").textContent = `Knock-out · voorspelling van ${state.current}`;
+
+  let html = renderCurrentUserBar();
+  html += `<div class="legend">
+    <span><span class="dot green"></span> al gespeeld – telt voor iedereen mee</span>
+    <span><span class="dot gold"></span> behaalde punten</span>
+  </div>`;
+
+  const rounds = ["16e finales","8e finales","Kwartfinales","Halve finales","Troostfinale","Finale"];
+  rounds.forEach(round=>{
+    const roundMatches = KNOCKOUT_MATCHES.filter(m=>m.round===round);
+    if(roundMatches.length===0) return;
+
+    html += `<div class="group-card">
+      <div class="group-head"><span>${round}</span></div>`;
+
+    roundMatches.forEach(m=>{
+      const teamNames = (state.koTeams && state.koTeams[m.id]) ? state.koTeams[m.id] : null;
+      const actual = getActual(m);
+      const played = !!actual;
+      const locked = isKOLocked(m);
+      const pred = getPred(state.current, m.id);
+      const points = played ? calcPoints(pred, actual) : null;
+
+      html += `<div class="match ${played?'played':''}">
+        <div class="match-top">
+          <span>${m.date} · ${m.time}</span>
+          <span class="match-status ${played?'played':''}">${played?'GESPEELD':(locked?'GESLOTEN':'NOG TE SPELEN')}</span>
+        </div>`;
+
+      if(!teamNames){
+        html += `<div class="teams-row" style="grid-template-columns:1fr;">
+          <div class="team-name" style="text-align:center;color:var(--muted);font-size:0.85rem;font-weight:600;">${m.placeholder}</div>
+        </div>
+        <div class="actual-row">
+          <span class="edit-actual-link" data-editteams="${m.id}" style="color:var(--accent);font-size:0.75rem;text-decoration:underline;cursor:pointer;">teams invullen zodra bekend</span>
+        </div>`;
+        if(state.editingTeams===m.id){
+          html += `<div class="actual-row" style="margin-top:4px;">
+            <input type="text" data-teamname="${m.id}" placeholder="Team 1" style="width:45%;padding:6px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+            <span class="dash">–</span>
+            <input type="text" data-teamname="${m.id}" placeholder="Team 2" style="width:45%;padding:6px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+          </div>
+          <div class="actual-row" style="margin-top:4px;">
+            <button class="save-actual-btn" data-saveteams="${m.id}" style="padding:6px 12px;border-radius:8px;border:none;background:var(--accent);color:#1a1300;font-weight:700;font-size:0.75rem;">Opslaan</button>
+          </div>
+          <div class="status-line" data-statusline="teams-${m.id}"></div>`;
+        }
+      } else {
+        const dv0 = getDisplayValue(m.id, 0, state.current);
+        const dv1 = getDisplayValue(m.id, 1, state.current);
+        html += `<div class="teams-row">
+          <div class="team-name">${escapeHtml(teamNames[0])}</div>
+          <div class="score-inputs">
+            <input type="number" min="0" max="20" inputmode="numeric" data-match="${m.id}" data-idx="0" value="${dv0}" ${locked?'disabled':''}>
+            <span class="dash">–</span>
+            <input type="number" min="0" max="20" inputmode="numeric" data-match="${m.id}" data-idx="1" value="${dv1}" ${locked?'disabled':''}>
+          </div>
+          <div class="team-name right">${escapeHtml(teamNames[1])}</div>
+        </div>
+        ${locked?'':`<div class="status-line" data-statusline="${m.id}"></div>`}
+        <div class="actual-row" style="margin-top:2px;">
+          <span class="edit-actual-link" data-editteams="${m.id}" style="color:var(--muted);font-size:0.68rem;text-decoration:underline;cursor:pointer;">teams wijzigen</span>
+        </div>`;
+
+        if(!played && locked){
+          html += `<div class="actual-row"><span class="lbl">Voorspelling vergrendeld – wedstrijd is begonnen</span></div>
+          <div class="actual-row" style="margin-top:4px;">
+            <span class="lbl">Uitslag invullen:</span>
+            <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="0" value="">
+            <span class="dash">–</span>
+            <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="1" value="">
+            <button class="save-actual-btn" data-saveactual="${m.id}" style="padding:6px 12px;border-radius:8px;border:none;background:var(--accent);color:#1a1300;font-weight:700;font-size:0.75rem;">Opslaan</button>
+          </div>
+          <div class="status-line" data-statusline="actual-${m.id}"></div>`;
+        }
+
+        if(played){
+          html += `<div class="actual-row">
+            <span class="lbl">Uitslag</span>
+            <span style="font-weight:800;color:var(--accent2);font-size:1rem;">${actual[0]} – ${actual[1]}</span>
+            <span class="edit-actual-link" data-editactual="${m.id}" style="color:var(--muted);font-size:0.7rem;text-decoration:underline;margin-left:6px;">wijzig</span>
+          </div>`;
+          if(points!==null){
+            html += `<div class="points-pill ${points===0?'zero':''}">${points} punten</div>`;
+          } else {
+            html += `<div class="points-pill zero">geen voorspelling</div>`;
+          }
+          if(state.editingActual===m.id){
+            html += `<div class="actual-row" style="margin-top:4px;">
+              <span class="lbl">Nieuwe uitslag:</span>
+              <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="0" value="${actual[0]}">
+              <span class="dash">–</span>
+              <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="1" value="${actual[1]}">
+              <button class="save-actual-btn" data-saveactual="${m.id}" style="padding:6px 12px;border-radius:8px;border:none;background:var(--accent);color:#1a1300;font-weight:700;font-size:0.75rem;">Opslaan</button>
+            </div>
+            <div class="status-line" data-statusline="actual-${m.id}"></div>`;
+          }
+        }
+      }
+
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  main.innerHTML = html;
+  bindCommonHandlers();
+  bindScoreInputs(main);
+  bindActualHandlers(main);
+
+  KNOCKOUT_MATCHES.forEach(m=>{
+    if(state.koTeams && state.koTeams[m.id]){
+      if(matchUI[m.id]) updateStatusLineDOM(m.id);
+      else {
+        const saved = getPred(state.current, m.id);
+        if(saved[0]!==null && saved[1]!==null){
+          ensureMatchUI(m.id, state.current);
+          matchUI[m.id].status = "saved";
+          updateStatusLineDOM(m.id);
+        }
+      }
+    }
+  });
+
+  main.querySelectorAll('[data-editteams]').forEach(el=>{
+    el.onclick = ()=>{
+      state.editingTeams = (state.editingTeams===el.dataset.editteams) ? null : el.dataset.editteams;
+      render();
+    };
+  });
+
+  main.querySelectorAll('[data-saveteams]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const mid = btn.dataset.saveteams;
+      const inputs = main.querySelectorAll(`input[data-teamname="${mid}"]`);
+      const t1 = inputs[0].value.trim(), t2 = inputs[1].value.trim();
+      if(!t1 || !t2) return;
+      const statusEl = document.querySelector(`[data-statusline="teams-${mid}"]`);
+      if(statusEl){ statusEl.className="status-line pending"; statusEl.textContent="Opslaan…"; }
+      queueAndSend("saveTeams", { matchId: mid, teams:[t1,t2] }, {
+        onSuccessExtra: ()=>{ state.editingTeams = null; render(); },
+        onErrorExtra: (err)=>{ if(statusEl){ statusEl.className="status-line error"; statusEl.textContent="Fout — "+err; } }
+      });
+    };
+  });
+}
+
+/* ---------- STAND ---------- */
+function renderStand(){
+  const main = document.getElementById("main");
+  document.getElementById("subhead").textContent = "Tussenstand";
+
+  const allMatches = MATCHES.concat(KNOCKOUT_MATCHES.filter(m=>state.koTeams && state.koTeams[m.id]));
+  const rows = state.players.map(p=>{
+    let total = 0, played = 0, exact = 0;
+    allMatches.forEach(m=>{
+      const actual = getActual(m);
+      if(!actual) return;
+      const pred = getPred(p, m.id);
+      const pts = calcPoints(pred, actual);
+      if(pts!==null){
+        played++;
+        total += pts;
+        if(pts===5) exact++;
+      }
+    });
+    return { player:p, total, played, exact };
+  }).sort((a,b)=> b.total - a.total);
+
+  let html = `<table class="lb-table"><thead><tr>
+    <th>#</th><th>Speler</th><th>Voorspeld</th><th>Exact</th><th>Punten</th>
+  </tr></thead><tbody>`;
+  rows.forEach((r,i)=>{
+    html += `<tr class="${r.player===state.current?'you':''}">
+      <td class="rank">${i+1}</td>
+      <td>${escapeHtml(r.player)}</td>
+      <td>${r.played}</td>
+      <td>${r.exact}</td>
+      <td class="points">${r.total}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  main.innerHTML = html;
+}
+
+/* ---------- PRIJZEN ---------- */
+function renderPrijzen(){
+  const main = document.getElementById("main");
+  document.getElementById("subhead").textContent = "Prijzen voor de top 3";
+
+  main.innerHTML = `
+  <div class="rules-box">
+    <b>🥇 1e plaats — Gratis diner</b><br>
+    De winnaar van de poule eet gratis. De rest van de groep trakteert (kosten worden gedeeld).
+  </div>
+  <div class="rules-box">
+    <b>🥈 2e plaats — Gratis drinken</b><br>
+    De nummer 2 krijgt alle drankjes tijdens het eten gratis.
+  </div>
+  <div class="rules-box">
+    <b>🥉 3e plaats — Kiest de eetplek</b><br>
+    De nummer 3 mag bepalen waar de hele groep gaat eten.
+  </div>
+  <div class="rules-box">
+    De eindstand wordt bepaald aan de hand van het totaal aantal punten na alle groepswedstrijden (zie tabblad "Stand").
+  </div>`;
+}
+
+/* ---------- SPELERS ---------- */
+function renderSpelers(){
+  const main = document.getElementById("main");
+  document.getElementById("subhead").textContent = "Spelers beheren";
+
+  let html = `<div class="manage-row">
+    <input type="text" id="newPlayerName" placeholder="Naam van vriend(in)">
+    <button id="addPlayerBtn">Toevoegen</button>
+  </div>`;
+
+  state.players.forEach(p=>{
+    html += `<div class="player-row">
+      <input type="text" class="rename-input" data-rename="${escapeAttr(p)}" value="${escapeAttr(p)}" style="flex:1;margin-right:8px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:0.9rem;">
+      ${state.players.length>1?`<span class="remove" data-remove="${escapeAttr(p)}">Verwijderen</span>`:''}
+    </div>`;
+  });
+
+  html += `<div class="rules-box" style="margin-top:14px;">
+    Voeg hier al je vrienden toe. Iedereen vult zijn eigen voorspellingen in via het tabblad "Groepsfase" – kies eerst de naam boven in de lijst. Verwijderen archiveert de voorspellingen van die speler (ze worden niet definitief gewist).
+  </div>`;
+
+  main.innerHTML = html;
+
+  document.getElementById("addPlayerBtn").onclick = ()=>{
+    const input = document.getElementById("newPlayerName");
+    const name = input.value.trim();
+    if(!name) return;
+    if(state.players.some(p=>p.toLowerCase()===name.toLowerCase())){
+      showToast("Deze naam bestaat al", true);
+      return;
+    }
+    input.disabled = true;
+    queueAndSend("addPlayer", { name }, {
+      onSuccessExtra: ()=>{ showToast("Toegevoegd ✓"); render(); },
+      onErrorExtra: (err)=>{ input.disabled=false; showToast("Mislukt: "+err, true); }
+    });
+  };
+
+  main.querySelectorAll('.rename-input').forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const oldName = inp.dataset.rename;
+      const newName = inp.value.trim();
+      if(!newName || newName===oldName) { inp.value = oldName; return; }
+      if(state.players.some(p=>p.toLowerCase()===newName.toLowerCase())){
+        showToast("Naam al in gebruik", true);
+        inp.value = oldName;
+        return;
+      }
+      inp.disabled = true;
+      queueAndSend("renamePlayer", { oldName, newName }, {
+        onSuccessExtra: ()=>{ showToast("Hernoemd ✓"); render(); },
+        onErrorExtra: (err)=>{ inp.disabled=false; inp.value=oldName; showToast("Mislukt: "+err, true); }
+      });
+    });
+  });
+
+  main.querySelectorAll('[data-remove]').forEach(el=>{
+    el.onclick = ()=>{
+      const name = el.dataset.remove;
+      if(!confirm(`Weet je zeker dat je "${name}" wilt verwijderen?\n\nDe voorspellingen van deze speler worden gearchiveerd, niet definitief gewist.`)) return;
+      queueAndSend("removePlayer", { name }, {
+        onSuccessExtra: ()=>{ showToast("Verwijderd ✓"); render(); },
+        onErrorExtra: (err)=>{ showToast("Mislukt: "+err, true); }
+      });
+    };
+  });
+}
+
+/* ---------- REGELS ---------- */
+function renderRegels(){
+  const main = document.getElementById("main");
+  document.getElementById("subhead").textContent = "Spelregels";
+
+  let configWarning = "";
+  if(!CONFIG.API_URL || CONFIG.API_URL.indexOf("http")!==0){
+    configWarning = `<div class="rules-box" style="border-color:var(--red);">
+      <b style="color:var(--red);">⚠️ Niet verbonden met gedeelde opslag</b><br>
+      Vul in de HTML-code bij <code>CONFIG.API_URL</code> de Apps Script Web App URL in, zodat alle spelers dezelfde stand zien.
+    </div>`;
+  } else if(lastSyncError){
+    configWarning = `<div class="rules-box" style="border-color:var(--red);">
+      <b style="color:var(--red);">⚠️ Verbindingsprobleem met Google Sheet</b><br>
+      ${escapeHtml(lastSyncError)}<br><br>
+      Check of de Apps Script Web App URL klopt en of de deployment "Toegang: Iedereen" heeft.
+    </div>`;
+  } else {
+    configWarning = `<div class="rules-box" style="border-color:var(--accent2);">
+      <b style="color:var(--accent2);">✓ Verbonden met gedeelde opslag</b>
+    </div>`;
+  }
+
+  let versionWarning = "";
+  if(state.serverAppVersion && state.serverAppVersion > APP_VERSION){
+    versionWarning = `<div class="rules-box" style="border-color:var(--accent);">
+      <b style="color:var(--accent);">⚠️ Nieuwe versie beschikbaar</b><br>
+      Deze pagina draait een oudere versie van de app. Herlaad de pagina (of haal de nieuwste link opnieuw op) voor de beste ervaring.
+    </div>`;
+  }
+
+  let queueWarning = "";
+  if(state.queue.length>0){
+    queueWarning = `<div class="rules-box" style="border-color:var(--red);">
+      <b style="color:var(--red);">${state.queue.length} wijziging${state.queue.length>1?'en':''} nog niet bevestigd</b><br>
+      <div style="margin-top:8px;">`;
+    state.queue.forEach(item=>{
+      const desc = item.action==="savePrediction" ? `Voorspelling ${item.payload.matchId} (${item.payload.player})`
+        : item.action==="deletePrediction" ? `Verwijderen ${item.payload.matchId} (${item.payload.player})`
+        : item.action==="saveActual" ? `Uitslag ${item.payload.matchId}`
+        : item.action==="saveTeams" ? `Teams ${item.payload.matchId}`
+        : item.action;
+      queueWarning += `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;">
+        <span>${escapeHtml(desc)} ${item.lastError?'– '+escapeHtml(item.lastError):''}</span>
+        <span class="status-retry-btn" data-retryqueue="${item.id}" style="color:var(--accent);">opnieuw</span>
+      </div>`;
+    });
+    queueWarning += `</div></div>`;
+  }
+
+  main.innerHTML = configWarning + versionWarning + queueWarning + `
+  <div class="rules-box">
+    <b>Puntensysteem per wedstrijd</b>
+    <ul>
+      <li><b>5 punten</b> – exacte uitslag goed (bv. 2-1 voorspeld, 2-1 geworden)</li>
+      <li><b>3 punten</b> – juiste uitkomst én juist doelsaldo, maar niet de exacte stand (bv. 2-1 voorspeld, 3-2 geworden)</li>
+      <li><b>1 punt</b> – juiste uitkomst (winst/gelijk/verlies), maar verkeerd saldo (bv. 2-0 voorspeld, 1-0 geworden)</li>
+      <li><b>0 punten</b> – verkeerde uitkomst</li>
+    </ul>
+  </div>
+  <div class="rules-box">
+    <b>Al gespeelde wedstrijden</b><br>
+    Wedstrijden die al gespeeld zijn (groen gemarkeerd) hebben een vaste uitslag in het schema. Iedereen die op tijd een voorspelling had ingevuld krijgt daarvoor automatisch punten op de tussenstand.
+  </div>
+  <div class="rules-box">
+    <b>Hoe werkt het?</b><br>
+    1. Ga naar "Spelers" en voeg iedereen toe.<br>
+    2. Kies bovenin "Wisselen" je eigen naam.<br>
+    3. Vul per groep de uitslagen in die jij verwacht – beide vakjes invullen om op te slaan.<br>
+    4. Check "Stand" voor de actuele ranglijst zodra wedstrijden gespeeld zijn.
+  </div>`;
+
+  main.querySelectorAll('[data-retryqueue]').forEach(el=>{
+    el.onclick = ()=>{
+      const item = state.queue.find(q=>q.id===el.dataset.retryqueue);
+      if(item) attemptQueueItem(item);
+    };
+  });
+}
+
+/* ---------- LOGIN ---------- */
+function renderLogin(){
+  const main = document.getElementById("main");
+  document.getElementById("tabs").style.display = "none";
+  document.getElementById("subhead").textContent = "Wie ben jij?";
+
+  let html = `<div class="rules-box">Kies je naam, of voeg jezelf toe als je er nog niet bij staat. Dit onthouden we op dit toestel.</div>`;
+  html += `<div class="player-select">${state.players.map(p=>
+    `<button class="player-chip" data-login="${escapeAttr(p)}">${escapeHtml(p)}</button>`
+  ).join("")}</div>`;
+  html += `<div class="manage-row">
+    <input type="text" id="newLoginName" placeholder="Jouw naam">
+    <button id="addLoginBtn">Toevoegen &amp; starten</button>
+  </div>`;
+
+  main.innerHTML = html;
+
+  main.querySelectorAll('[data-login]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const name = btn.dataset.login;
+      state.current = name;
+      saveLocalName(name);
+      document.getElementById("tabs").style.display = "";
+      render();
+    };
+  });
+
+  document.getElementById("addLoginBtn").onclick = ()=>{
+    const input = document.getElementById("newLoginName");
+    const name = input.value.trim();
+    if(!name) return;
+    const exists = state.players.some(p=>p.toLowerCase()===name.toLowerCase());
+    state.current = name;
+    saveLocalName(name);
+    document.getElementById("tabs").style.display = "";
+    if(exists){
+      render();
+      return;
+    }
+    input.disabled = true;
+    queueAndSend("addPlayer", { name }, {
+      onSuccessExtra: ()=>{ render(); },
+      onErrorExtra: ()=>{ render(); } // speler kan nog meedoen, alleen niet bevestigd in de spelerslijst; retry-banner toont dit
+    });
+    render();
+  };
+}
+
+/* ---------- INIT ---------- */
+(async function(){
+  state.queue = loadQueueFromStorage();
+  await loadState();
+  // Direct bij opstarten proberen we eventuele niet-verzonden wijzigingen
+  // (bv. door het sluiten van de app tijdens het opslaan) opnieuw te sturen.
+  state.queue.forEach(item=>attemptQueueItem(item));
+
+  const localName = await loadLocalName();
+  if(localName && state.players.includes(localName)){
+    state.current = localName;
+    render();
+  } else {
+    renderLogin();
+  }
+
+  if(CONFIG.API_URL && CONFIG.API_URL.indexOf("http")===0){
+    setInterval(async ()=>{
+      const before = JSON.stringify({players:state.players, predictions:state.predictions, actuals:state.actuals, koTeams:state.koTeams});
+      await loadState();
+      const after = JSON.stringify({players:state.players, predictions:state.predictions, actuals:state.actuals, koTeams:state.koTeams});
+      if(before!==after){
+        const active = document.activeElement;
+        const isTypingScore = active && active.matches && active.matches('input[data-match]');
+        if(!isTypingScore) render();
+        // Als de gebruiker wel aan het typen is: de nieuwe serverdata staat
+        // nu in state.predictions/actuals/koTeams en wordt zichtbaar bij de
+        // volgende render(); matchUI (wat nu op het scherm staat) blijft
+        // intussen ongewijzigd, dus er gaat niets verloren.
+      }
+    }, 20000);
+  }
+})();
+</script>
+</body>
+</html>
