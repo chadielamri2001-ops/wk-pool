@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#e9eee9">
+<title>WK 2026 Voorspelpoule</title>
+<style>
+  :root{
+    color-scheme:light;
+    --bg:#e9eee9;
+    --bg-soft:#dde6e0;
+    --panel:#f8faf7;
+    --panel-solid:#f8faf7;
+    --panel2:#eef4ef;
+    --line:#cad6d0;
+    --line-strong:#aebdb5;
+    --accent:#1457c8;
+    --accent-strong:#0f4fb7;
+    --accent2:#07865d;
+    --accent-red:#c9272d;
+    --gold:#b88a2e;
+    --text:#111827;
+    --muted:#66736d;
+    --red:#c9272d;
+    --warning:#b7791f;
+    --shadow:0 18px 45px rgba(10,31,44,.12);
+    --shadow-soft:0 8px 22px rgba(10,31,44,.08);
+    --radius:8px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;background:var(--bg);}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:
+      linear-gradient(145deg,rgba(20,87,200,.08),transparent 28%),
+      linear-gradient(215deg,rgba(7,134,93,.10),transparent 34%),
+      linear-gradient(180deg,#e4ebe5 0%,#d8e4dd 45%,#eef2ec 100%);
+    color:var(--text);
+    padding-bottom:76px;
+    font-size:15px;
+  }
+  button,input{font:inherit;}
+  button{cursor:pointer;}
+  header{
+    padding:18px 16px 14px;
+    text-align:left;
+    border-bottom:1px solid var(--line);
+    position:sticky;
+    top:0;
+    background:rgba(242,246,241,.90);
+    backdrop-filter:blur(18px) saturate(135%);
+    -webkit-backdrop-filter:blur(18px) saturate(135%);
+    z-index:20;
+  }
+  header::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--accent-red),var(--accent2),var(--accent));}
+  .header-inner{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .brand{min-width:0;}
+  header h1{margin:0;font-size:clamp(1.1rem,3vw,1.42rem);letter-spacing:0;font-weight:720;line-height:1.1;}
+  header h1 span{color:var(--accent-strong);font-weight:780;}
+  header p{margin:5px 0 0;color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sync-status{display:flex;align-items:center;gap:7px;flex:0 0 auto;padding:7px 10px;border:1px solid var(--line);background:var(--panel);border-radius:999px;color:var(--muted);font-size:.72rem;font-weight:620;box-shadow:var(--shadow-soft);}
+  .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--accent2);box-shadow:0 0 0 3px rgba(7,134,93,.12);}
+  .sync-status.saving .sync-dot{background:var(--warning);box-shadow:0 0 0 3px rgba(183,121,31,.14);animation:pulse 1s infinite;}
+  .sync-status.error .sync-dot{background:var(--red);box-shadow:0 0 0 3px rgba(201,39,45,.12);}
+  @keyframes pulse{50%{opacity:.4;}}
+
+  .tabs{
+    display:flex;gap:6px;padding:10px 14px;overflow-x:auto;border-bottom:1px solid var(--line);
+    position:sticky;top:73px;background:rgba(232,239,233,.92);backdrop-filter:blur(16px);z-index:15;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex:0 0 auto;padding:9px 13px;border-radius:999px;background:transparent;color:var(--muted);border:1px solid transparent;font-size:.82rem;font-weight:620;white-space:nowrap;transition:.18s ease;}
+  .tab:hover{color:var(--text);background:rgba(17,24,39,.04);}
+  .tab.active{background:var(--panel);color:var(--accent-strong);border-color:#b7c8ed;box-shadow:var(--shadow-soft);}
+
+  main{padding:18px 14px;max-width:920px;margin:0 auto;}
+  .player-select{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .player-chip{min-height:40px;padding:8px 13px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--text);font-size:.84rem;font-weight:620;box-shadow:var(--shadow-soft);transition:.18s ease;}
+  .player-chip:hover{transform:translateY(-1px);border-color:var(--line-strong);}
+  .player-chip.active{background:#dcefe7;color:#065f46;border-color:#92cdb8;}
+
+  .group-card,.rules-box,.lb-table,.player-row{
+    background:var(--panel);
+    border:1px solid var(--line);box-shadow:var(--shadow-soft);
+  }
+  .group-card{border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .group-head{padding:14px 16px;font-weight:680;font-size:.94rem;background:var(--panel2);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .group-head .teams{color:var(--muted);font-weight:450;font-size:.72rem;text-align:right;line-height:1.35;}
+  .match{padding:15px 16px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:11px;transition:.18s ease;}
+  .match:last-child{border-bottom:none;}
+  .match.played{background:linear-gradient(90deg,rgba(7,134,93,.06),transparent 58%);}
+  .match-top{display:flex;justify-content:space-between;align-items:center;font-size:.72rem;color:var(--muted);}
+  .match-status{font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:4px 8px;border-radius:999px;background:#e7eee9;border:1px solid var(--line);color:var(--muted);}
+  .match-status.played{background:#dcefe7;color:#047857;border-color:#92cdb8;}
+  .match-status.live{background:#f4e7c9;color:#7a4b0e;border-color:#d2aa5c;}
+  .teams-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px;}
+  .team-name{font-weight:630;font-size:.94rem;line-height:1.25;overflow-wrap:anywhere;}
+  .team-name.right{text-align:right;}
+  .score-inputs{display:flex;align-items:center;gap:7px;justify-content:center;}
+  .score-inputs input,.actual-row input[type="number"]{width:46px;height:46px;text-align:center;font-size:1.04rem;font-weight:650;border-radius:8px;border:1px solid var(--line-strong);background:#f1f5f1;color:var(--text);box-shadow:inset 0 1px 2px rgba(15,23,42,.06);}
+  .score-inputs input:focus,.actual-row input:focus,.manage-row input:focus,.rename-input:focus{outline:none;border-color:#83a6e6;box-shadow:0 0 0 3px rgba(20,87,200,.12);}
+  input:disabled{opacity:.48;cursor:not-allowed;}
+  .score-inputs .dash{color:var(--muted);font-weight:620;}
+  .actual-row{display:flex;justify-content:center;align-items:center;gap:8px;font-size:.8rem;color:var(--muted);flex-wrap:wrap;}
+  .actual-row .lbl{font-size:.67rem;text-transform:uppercase;letter-spacing:.055em;font-weight:650;}
+  .points-pill{align-self:center;font-size:.69rem;font-weight:720;padding:5px 10px;border-radius:999px;background:#dde8fb;border:1px solid #aebfe6;color:var(--accent-strong);}
+  .points-pill.zero{background:#e7eee9;border-color:var(--line);color:var(--muted);}
+
+  .lb-table{width:100%;border-collapse:separate;border-spacing:0;border-radius:var(--radius);overflow:hidden;}
+  .lb-table th,.lb-table td{padding:13px 13px;text-align:left;font-size:.88rem;}
+  .lb-table th{background:var(--panel2);color:var(--muted);font-size:.66rem;text-transform:uppercase;letter-spacing:.065em;font-weight:650;}
+  .lb-table tr:not(:last-child) td{border-bottom:1px solid var(--line);}
+  .lb-table td.points{font-weight:720;color:var(--accent-strong);text-align:right;}
+  .lb-table td.rank{color:var(--muted);font-weight:700;width:34px;}
+  .lb-table tr.you td{background:#dde8fb;}
+  .rules-box{border-radius:var(--radius);padding:14px 15px;margin-bottom:15px;font-size:.84rem;line-height:1.5;color:var(--muted);}
+  .rules-box b{color:var(--text);}
+  .rules-box ul{margin:7px 0 0;padding-left:20px;}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.73rem;color:var(--muted);margin-bottom:12px;}
+  .legend span{display:flex;align-items:center;gap:6px;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}.dot.green{background:var(--accent2);}.dot.gold{background:var(--gold);}
+  .empty{text-align:center;color:var(--muted);padding:36px 12px;font-size:.9rem;}
+  .save-toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#0f513f;color:#fff;padding:10px 16px;border-radius:999px;font-weight:650;font-size:.78rem;opacity:0;transition:.22s ease;pointer-events:none;z-index:50;box-shadow:0 15px 36px rgba(15,23,42,.22);}
+  .save-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .manage-row{display:flex;gap:9px;margin-bottom:15px;}
+  .manage-row input,.rename-input{flex:1;min-width:0;padding:12px 13px;border-radius:8px;border:1px solid var(--line);background:#f1f5f1;color:var(--text);font-size:.9rem;}
+  .manage-row button,.save-actual-btn{min-height:42px;padding:9px 14px;border-radius:8px;border:1px solid #0f4fb7!important;background:var(--accent-strong)!important;color:#fff!important;font-weight:650!important;box-shadow:0 8px 18px rgba(20,87,200,.18);}
+  .player-row{display:flex;justify-content:space-between;align-items:center;border-radius:8px;padding:10px 12px;margin-bottom:9px;}
+  .player-row .remove{color:var(--red);font-weight:650;font-size:.78rem;padding:8px;cursor:pointer;}
+  code{background:#eef2ee;padding:2px 5px;border-radius:6px;}
+
+
+  .dashboard-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+  .stat-card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 15px;box-shadow:var(--shadow-soft);}
+  .stat-value{font-size:1.36rem;font-weight:760;letter-spacing:0;color:var(--text);}
+  .stat-label{margin-top:4px;color:var(--muted);font-size:.72rem;font-weight:580;}
+  .progress-track{height:9px;border-radius:999px;background:rgba(148,163,184,.12);overflow:hidden;margin:12px 0 4px;}
+  .progress-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent-red),var(--accent2),var(--accent));}
+  .section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 2px 10px;font-size:.92rem;font-weight:700;}
+  .match-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .other-picks{margin-top:4px;padding-top:9px;border-top:1px dashed var(--line);display:flex;gap:6px;flex-wrap:wrap;}
+  .pick-chip{padding:5px 8px;border-radius:999px;background:#eef4ef;border:1px solid var(--line);font-size:.68rem;color:var(--muted);}
+  .pick-chip b{color:var(--text);}
+  .mini-btn{flex:0 0 auto;min-height:36px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:.76rem;font-weight:620;box-shadow:var(--shadow-soft);}
+  .schedule-note{padding:12px 14px;margin-bottom:10px;}
+  .schedule-list{overflow:hidden;}
+  .schedule-match{gap:9px;}
+  .schedule-top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.72rem;color:var(--muted);}
+  .schedule-time{font-weight:700;color:var(--text);font-size:.9rem;}
+  .schedule-id{font-weight:620;color:var(--muted);}
+  .schedule-pick{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:.72rem;font-weight:620;}
+  .schedule-pick b{color:var(--text);font-size:.88rem;}
+  .schedule-score.live{color:#8a5a12;}
+  .schedule-score.final{color:#047857;}
+  .live-panel{margin:0 0 14px;padding:14px 15px;border-radius:8px;background:linear-gradient(90deg,#f4e7c9,#eef4ef);border:1px solid #d2aa5c;box-shadow:var(--shadow-soft);}
+  .live-panel-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px;font-size:.78rem;color:#8a5a12;font-weight:680;letter-spacing:0;}
+  .live-panel-score{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center;font-size:1rem;}
+  .live-panel-score span{min-width:0;overflow-wrap:anywhere;}
+  .live-panel-score strong{font-size:1.45rem;font-weight:760;color:var(--text);white-space:nowrap;}
+  .live-minute{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:#fff9ec;border:1px solid #d2aa5c;color:#7a4b0e;font-weight:700;}
+  .goal-list{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;}
+  .goal-chip{font-size:.72rem;color:var(--text);background:#f8faf7;border:1px solid var(--line);border-radius:999px;padding:5px 8px;}
+  .goal-chip span{color:var(--muted);}
+
+  @media(max-width:700px){
+    body{padding-bottom:92px;}
+    header{padding:15px 13px 13px;}
+    .sync-status{padding:7px 9px;}.sync-status span:last-child{display:none;}
+    .tabs{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:40;border-top:1px solid var(--line);border-bottom:0;padding:8px 8px calc(8px + env(safe-area-inset-bottom));justify-content:space-around;background:rgba(242,246,241,.96);box-shadow:0 -12px 30px rgba(15,23,42,.13);}
+    .tab{flex:1;min-width:0;padding:7px 3px;border-radius:8px;font-size:.64rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:48px;}
+    .tab .tab-icon{display:none;}.tab .tab-label{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;}.tab.active{background:#dde8fb;}
+    .dashboard-grid{grid-template-columns:repeat(3,1fr);gap:8px}.stat-card{padding:12px 10px}.stat-value{font-size:1.16rem}.stat-label{font-size:.62rem}
+    main{padding:14px 10px;}
+    .group-head{align-items:flex-start;}.group-head .teams{max-width:68%;}
+    .match{padding:14px 12px;}
+    .team-name{font-size:.86rem;}
+    .score-inputs input,.actual-row input[type="number"]{width:44px;height:44px;}
+    .schedule-note{padding:10px 12px;font-size:.78rem;line-height:1.45;}
+    .schedule-match{padding:11px 10px;gap:8px;}
+    .schedule-top{font-size:.68rem;}
+    .schedule-time{font-size:.86rem;}
+    .schedule-match .teams-row{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px;}
+    .schedule-match .team-name{font-size:.78rem;line-height:1.18;}
+    .schedule-match .score-inputs{gap:4px;}
+    .schedule-match .score-inputs input{width:38px;height:40px;border-radius:11px;font-size:.95rem;}
+    .schedule-pick{font-size:.66rem;padding-top:2px;}
+    .schedule-pick b{font-size:.8rem;}
+    .live-panel{padding:12px;}
+    .live-panel-score{font-size:.86rem;gap:6px;}
+    .live-panel-score strong{font-size:1.24rem;}
+    .goal-chip{font-size:.68rem;}
+    .manage-row{flex-direction:column;}.manage-row button{width:100%;}
+    .lb-table{display:block;overflow-x:auto;white-space:nowrap;}
+    .rules-box{padding:13px;}
+  }
+  @media(max-width:390px){
+    .teams-row{gap:6px;}.team-name{font-size:.79rem;}.score-inputs{gap:4px;}.score-inputs input{width:40px;height:42px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <h1>WK <span>2026</span> Voorspelpoule</h1>
+      <p id="subhead">Groepsfase &middot; voorspellingen per speler</p>
+    </div>
+    <div class="sync-status" id="syncStatus"><span class="sync-dot"></span><span id="syncText">Verbonden</span></div>
+  </div>
+</header>
+
+<div class="tabs" id="tabs"></div>
+
+<main id="main"></main>
+
+<div class="save-toast" id="toast">Opgeslagen ✓</div>
+
+<script>
+/* ---------- DATA: groepsfase WK 2026 (alle 72 wedstrijden) ---------- */
+/* "played" matches hebben een 'actual' score; deze tellen voor IEDEREEN als behaald. */
+const MATCHES = [
+  // Groep A
+  {id:"A1", group:"A", date:"11 jun", time:"21:00", home:"Mexico", away:"Zuid-Afrika", actual:[2,0]},
+  {id:"A2", group:"A", date:"12 jun", time:"04:00", home:"Zuid-Korea", away:"Tsjechië", actual:[2,1]},
+  {id:"A3", group:"A", date:"18 jun", time:"18:00", home:"Tsjechië", away:"Zuid-Afrika", actual:null},
+  {id:"A4", group:"A", date:"19 jun", time:"03:00", home:"Mexico", away:"Zuid-Korea", actual:null},
+  {id:"A5", group:"A", date:"25 jun", time:"03:00", home:"Tsjechië", away:"Mexico", actual:null},
+  {id:"A6", group:"A", date:"25 jun", time:"03:00", home:"Zuid-Afrika", away:"Zuid-Korea", actual:null},
+  // Groep B
+  {id:"B1", group:"B", date:"12 jun", time:"21:00", home:"Canada", away:"Bosnië & Herzegovina", actual:[1,1]},
+  {id:"B2", group:"B", date:"13 jun", time:"21:00", home:"Qatar", away:"Zwitserland", actual:null},
+  {id:"B3", group:"B", date:"18 jun", time:"21:00", home:"Zwitserland", away:"Bosnië & Herzegovina", actual:null},
+  {id:"B4", group:"B", date:"19 jun", time:"00:00", home:"Canada", away:"Qatar", actual:null},
+  {id:"B5", group:"B", date:"24 jun", time:"21:00", home:"Zwitserland", away:"Canada", actual:null},
+  {id:"B6", group:"B", date:"24 jun", time:"21:00", home:"Bosnië & Herzegovina", away:"Qatar", actual:null},
+  // Groep C
+  {id:"C1", group:"C", date:"14 jun", time:"00:00", home:"Brazilië", away:"Marokko", actual:null},
+  {id:"C2", group:"C", date:"14 jun", time:"03:00", home:"Haïti", away:"Schotland", actual:null},
+  {id:"C3", group:"C", date:"20 jun", time:"00:00", home:"Schotland", away:"Marokko", actual:null},
+  {id:"C4", group:"C", date:"20 jun", time:"02:30", home:"Brazilië", away:"Haïti", actual:null},
+  {id:"C5", group:"C", date:"25 jun", time:"00:00", home:"Schotland", away:"Brazilië", actual:null},
+  {id:"C6", group:"C", date:"25 jun", time:"00:00", home:"Marokko", away:"Haïti", actual:null},
+  // Groep D
+  {id:"D1", group:"D", date:"13 jun", time:"03:00", home:"Verenigde Staten", away:"Paraguay", actual:[4,1]},
+  {id:"D2", group:"D", date:"14 jun", time:"06:00", home:"Australië", away:"Turkije", actual:null},
+  {id:"D3", group:"D", date:"20 jun", time:"05:00", home:"Turkije", away:"Paraguay", actual:null},
+  {id:"D4", group:"D", date:"19 jun", time:"21:00", home:"Verenigde Staten", away:"Australië", actual:null},
+  {id:"D5", group:"D", date:"26 jun", time:"04:00", home:"Turkije", away:"Verenigde Staten", actual:null},
+  {id:"D6", group:"D", date:"26 jun", time:"04:00", home:"Paraguay", away:"Australië", actual:null},
+  // Groep E
+  {id:"E1", group:"E", date:"14 jun", time:"19:00", home:"Duitsland", away:"Curaçao", actual:null},
+  {id:"E2", group:"E", date:"15 jun", time:"01:00", home:"Ivoorkust", away:"Ecuador", actual:null},
+  {id:"E3", group:"E", date:"20 jun", time:"22:00", home:"Duitsland", away:"Ivoorkust", actual:null},
+  {id:"E4", group:"E", date:"21 jun", time:"02:00", home:"Ecuador", away:"Curaçao", actual:null},
+  {id:"E5", group:"E", date:"25 jun", time:"22:00", home:"Ecuador", away:"Duitsland", actual:null},
+  {id:"E6", group:"E", date:"25 jun", time:"22:00", home:"Curaçao", away:"Ivoorkust", actual:null},
+  // Groep F
+  {id:"F1", group:"F", date:"14 jun", time:"22:00", home:"Nederland", away:"Japan", actual:null},
+  {id:"F2", group:"F", date:"15 jun", time:"04:00", home:"Zweden", away:"Tunesië", actual:null},
+  {id:"F3", group:"F", date:"21 jun", time:"06:00", home:"Tunesië", away:"Japan", actual:null},
+  {id:"F4", group:"F", date:"20 jun", time:"19:00", home:"Nederland", away:"Zweden", actual:null},
+  {id:"F5", group:"F", date:"26 jun", time:"01:00", home:"Japan", away:"Zweden", actual:null},
+  {id:"F6", group:"F", date:"26 jun", time:"01:00", home:"Tunesië", away:"Nederland", actual:null},
+  // Groep G
+  {id:"G1", group:"G", date:"15 jun", time:"21:00", home:"België", away:"Egypte", actual:null},
+  {id:"G2", group:"G", date:"16 jun", time:"03:00", home:"Iran", away:"Nieuw-Zeeland", actual:null},
+  {id:"G3", group:"G", date:"21 jun", time:"21:00", home:"België", away:"Iran", actual:null},
+  {id:"G4", group:"G", date:"22 jun", time:"03:00", home:"Nieuw-Zeeland", away:"Egypte", actual:null},
+  {id:"G5", group:"G", date:"27 jun", time:"05:00", home:"Egypte", away:"Iran", actual:null},
+  {id:"G6", group:"G", date:"27 jun", time:"05:00", home:"Nieuw-Zeeland", away:"België", actual:null},
+  // Groep H
+  {id:"H1", group:"H", date:"15 jun", time:"18:00", home:"Spanje", away:"Kaapverdië", actual:null},
+  {id:"H2", group:"H", date:"16 jun", time:"00:00", home:"Saoedi-Arabië", away:"Uruguay", actual:null},
+  {id:"H3", group:"H", date:"21 jun", time:"18:00", home:"Spanje", away:"Saoedi-Arabië", actual:null},
+  {id:"H4", group:"H", date:"22 jun", time:"00:00", home:"Uruguay", away:"Kaapverdië", actual:null},
+  {id:"H5", group:"H", date:"27 jun", time:"02:00", home:"Kaapverdië", away:"Saoedi-Arabië", actual:null},
+  {id:"H6", group:"H", date:"27 jun", time:"02:00", home:"Uruguay", away:"Spanje", actual:null},
+  // Groep I
+  {id:"I1", group:"I", date:"16 jun", time:"21:00", home:"Frankrijk", away:"Senegal", actual:null},
+  {id:"I2", group:"I", date:"17 jun", time:"00:00", home:"Irak", away:"Noorwegen", actual:null},
+  {id:"I3", group:"I", date:"22 jun", time:"23:00", home:"Frankrijk", away:"Irak", actual:null},
+  {id:"I4", group:"I", date:"23 jun", time:"02:00", home:"Noorwegen", away:"Senegal", actual:null},
+  {id:"I5", group:"I", date:"26 jun", time:"21:00", home:"Noorwegen", away:"Frankrijk", actual:null},
+  {id:"I6", group:"I", date:"26 jun", time:"21:00", home:"Senegal", away:"Irak", actual:null},
+  // Groep J
+  {id:"J1", group:"J", date:"17 jun", time:"03:00", home:"Argentinië", away:"Algerije", actual:null},
+  {id:"J2", group:"J", date:"17 jun", time:"06:00", home:"Oostenrijk", away:"Jordanië", actual:null},
+  {id:"J3", group:"J", date:"22 jun", time:"19:00", home:"Argentinië", away:"Oostenrijk", actual:null},
+  {id:"J4", group:"J", date:"23 jun", time:"05:00", home:"Jordanië", away:"Algerije", actual:null},
+  {id:"J5", group:"J", date:"28 jun", time:"04:00", home:"Algerije", away:"Oostenrijk", actual:null},
+  {id:"J6", group:"J", date:"28 jun", time:"04:00", home:"Jordanië", away:"Argentinië", actual:null},
+  // Groep K
+  {id:"K1", group:"K", date:"17 jun", time:"19:00", home:"Portugal", away:"DR Congo", actual:null},
+  {id:"K2", group:"K", date:"18 jun", time:"04:00", home:"Oezbekistan", away:"Colombia", actual:null},
+  {id:"K3", group:"K", date:"23 jun", time:"19:00", home:"Portugal", away:"Oezbekistan", actual:null},
+  {id:"K4", group:"K", date:"24 jun", time:"04:00", home:"Colombia", away:"DR Congo", actual:null},
+  {id:"K5", group:"K", date:"28 jun", time:"01:30", home:"Colombia", away:"Portugal", actual:null},
+  {id:"K6", group:"K", date:"28 jun", time:"01:30", home:"DR Congo", away:"Oezbekistan", actual:null},
+  // Groep L
+  {id:"L1", group:"L", date:"17 jun", time:"22:00", home:"Engeland", away:"Kroatië", actual:null},
+  {id:"L2", group:"L", date:"18 jun", time:"01:00", home:"Ghana", away:"Panama", actual:null},
+  {id:"L3", group:"L", date:"23 jun", time:"22:00", home:"Engeland", away:"Ghana", actual:null},
+  {id:"L4", group:"L", date:"24 jun", time:"01:00", home:"Panama", away:"Kroatië", actual:null},
+  {id:"L5", group:"L", date:"27 jun", time:"23:00", home:"Panama", away:"Engeland", actual:null},
+  {id:"L6", group:"L", date:"27 jun", time:"23:00", home:"Kroatië", away:"Ghana", actual:null},
+];
+
+/* ---------- KNOCK-OUTFASE (placeholders, in te vullen zodra bekend) ---------- */
+const KNOCKOUT_MATCHES = [
+  {id:"KO1", round:"16e finales", date:"28 jun", time:"21:00", placeholder:"Nummer 2 Poule A - Nummer 2 Poule B"},
+  {id:"KO2", round:"16e finales", date:"29 jun", time:"19:00", placeholder:"Winnaar Poule C - Nummer 2 Poule F"},
+  {id:"KO3", round:"16e finales", date:"29 jun", time:"22:30", placeholder:"Winnaar Poule E - Nummer 3 Poule AB/C/D/F"},
+  {id:"KO4", round:"16e finales", date:"30 jun", time:"03:00", placeholder:"Winnaar Poule F - Nummer 2 Poule C"},
+  {id:"KO5", round:"16e finales", date:"30 jun", time:"19:00", placeholder:"Nummer 2 Poule E - Nummer 2 Poule I"},
+  {id:"KO6", round:"16e finales", date:"30 jun", time:"23:00", placeholder:"Winnaar Poule I - Nummer 3 Poule C/D/F/G/H"},
+  {id:"KO7", round:"16e finales", date:"1 jul", time:"03:00", placeholder:"Winnaar Poule A - Nummer 3 Poule C/E/F/H/I"},
+  {id:"KO8", round:"16e finales", date:"1 jul", time:"18:00", placeholder:"Winnaar Poule L - Nummer 3 Poule E/H/I/J/K"},
+  {id:"KO9", round:"16e finales", date:"1 jul", time:"22:00", placeholder:"Winnaar Poule G - Nummer 3 Poule A/E/H/I/J"},
+  {id:"KO10", round:"16e finales", date:"2 jul", time:"02:00", placeholder:"Winnaar Poule D - Nummer 3 Poule B/E/F/I/J"},
+  {id:"KO11", round:"16e finales", date:"2 jul", time:"21:00", placeholder:"Winnaar Poule H - Nummer 2 Poule J"},
+  {id:"KO12", round:"16e finales", date:"3 jul", time:"01:00", placeholder:"Nummer 2 Poule K - Nummer 2 Poule L"},
+  {id:"KO13", round:"16e finales", date:"3 jul", time:"05:00", placeholder:"Winnaar Poule B - Nummer 3 Poule E/F/G/I/J"},
+  {id:"KO14", round:"16e finales", date:"3 jul", time:"20:00", placeholder:"Nummer 2 Poule D - Nummer 2 Poule G"},
+  {id:"KO15", round:"16e finales", date:"4 jul", time:"00:00", placeholder:"Winnaar Poule J - Nummer 2 Poule H"},
+  {id:"KO16", round:"16e finales", date:"4 jul", time:"03:30", placeholder:"Winnaar Poule K - Nummer 3 Poule D/E/I/J/L"},
+
+  {id:"KO17", round:"8e finales", date:"4 jul", time:"19:00", placeholder:"Winnaar duel 73 - Winnaar duel 75"},
+  {id:"KO18", round:"8e finales", date:"4 jul", time:"23:00", placeholder:"Winnaar duel 74 - Winnaar duel 77"},
+  {id:"KO19", round:"8e finales", date:"5 jul", time:"22:00", placeholder:"Winnaar duel 76 - Winnaar duel 78"},
+  {id:"KO20", round:"8e finales", date:"6 jul", time:"02:00", placeholder:"Winnaar duel 79 - Winnaar duel 80"},
+  {id:"KO21", round:"8e finales", date:"6 jul", time:"21:00", placeholder:"Winnaar duel 83 - Winnaar duel 84"},
+  {id:"KO22", round:"8e finales", date:"7 jul", time:"02:00", placeholder:"Winnaar duel 81 - Winnaar duel 82"},
+  {id:"KO23", round:"8e finales", date:"7 jul", time:"18:00", placeholder:"Winnaar duel 86 - Winnaar duel 88"},
+  {id:"KO24", round:"8e finales", date:"7 jul", time:"22:00", placeholder:"Winnaar duel 85 - Winnaar duel 87"},
+
+  {id:"KO25", round:"Kwartfinales", date:"9 jul", time:"22:00", placeholder:"Winnaar duel 89 - Winnaar duel 90"},
+  {id:"KO26", round:"Kwartfinales", date:"10 jul", time:"21:00", placeholder:"Winnaar duel 93 - Winnaar duel 94"},
+  {id:"KO27", round:"Kwartfinales", date:"11 jul", time:"23:00", placeholder:"Winnaar duel 91 - Winnaar duel 92"},
+  {id:"KO28", round:"Kwartfinales", date:"12 jul", time:"03:00", placeholder:"Winnaar duel 95 - Winnaar duel 96"},
+
+  {id:"KO29", round:"Halve finales", date:"14 jul", time:"21:00", placeholder:"Winnaar duel 97 - Winnaar duel 98"},
+  {id:"KO30", round:"Halve finales", date:"15 jul", time:"21:00", placeholder:"Winnaar duel 99 - Winnaar duel 100"},
+
+  {id:"KO31", round:"Troostfinale", date:"18 jul", time:"23:00", placeholder:"Verliezer duel 101 - Verliezer duel 102"},
+
+  {id:"KO32", round:"Finale", date:"19 jul", time:"21:00", placeholder:"Winnaar duel 101 - Winnaar duel 102"},
+];
+
+const GROUP_TEAMS = {
+  A:["Mexico","Zuid-Afrika","Zuid-Korea","Tsjechië"],
+  B:["Canada","Bosnië & Herzegovina","Qatar","Zwitserland"],
+  C:["Brazilië","Marokko","Haïti","Schotland"],
+  D:["Verenigde Staten","Paraguay","Australië","Turkije"],
+  E:["Duitsland","Curaçao","Ivoorkust","Ecuador"],
+  F:["Nederland","Japan","Zweden","Tunesië"],
+  G:["België","Egypte","Iran","Nieuw-Zeeland"],
+  H:["Spanje","Kaapverdië","Saoedi-Arabië","Uruguay"],
+  I:["Frankrijk","Senegal","Irak","Noorwegen"],
+  J:["Argentinië","Algerije","Oostenrijk","Jordanië"],
+  K:["Portugal","DR Congo","Oezbekistan","Colombia"],
+  L:["Engeland","Kroatië","Ghana","Panama"],
+};
+
+/* ---------- TIME / LOCKING ---------- */
+// All match dates are "DD jun"/"DD jul" 2026, times are NL local time (Europe/Amsterdam).
+const MONTH_MAP = {jun:"06", jul:"07"};
+function kickoffUTCMillis(m){
+  const parts = m.date.split(" "); // ["11","jun"]
+  const day = parts[0].padStart(2,"0");
+  const month = MONTH_MAP[parts[1]];
+  // Build an ISO string and ask: what UTC instant corresponds to this wall-clock
+  // time in Europe/Amsterdam? We do this by formatting a guess and adjusting
+  // for the Amsterdam offset (CET=+1 / CEST=+2). June/July = CEST = +2.
+  const offsetHours = 2; // CEST applies for all WK 2026 group stage dates (Jun-Jul)
+  const iso = `2026-${month}-${day}T${m.time}:00`;
+  const localMillis = Date.parse(iso + "Z"); // treat as if UTC, then shift
+  return localMillis - offsetHours*3600*1000; // actual UTC instant
+}
+function isLocked(m){
+  if(getActual(m)) return true;
+  return Date.now() >= kickoffUTCMillis(m);
+}
+function isKOLocked(m){
+  if(getActual(m)) return true;
+  return Date.now() >= kickoffUTCMillis(m);
+}
+
+function amsterdamDatePartsFromMillis(ms){
+  const parts = new Intl.DateTimeFormat('nl-NL', {
+    timeZone: 'Europe/Amsterdam',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).formatToParts(new Date(ms));
+  const values = {};
+  parts.forEach(p=>{ if(p.type !== 'literal') values[p.type] = p.value; });
+  return values;
+}
+function amsterdamDateKeyFromMillis(ms){
+  const parts = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Amsterdam',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(new Date(ms));
+  const values = {};
+  parts.forEach(p=>{ if(p.type !== 'literal') values[p.type] = p.value; });
+  return values.year + '-' + values.month + '-' + values.day;
+}
+function matchDateKey(m){ return amsterdamDateKeyFromMillis(kickoffUTCMillis(m)); }
+function matchDayLabel(m){
+  const p = amsterdamDatePartsFromMillis(kickoffUTCMillis(m));
+  return p.weekday + ' ' + p.day + ' ' + p.month;
+}
+function matchTeams(m){
+  if(m.home) return [m.home, m.away];
+  return (state.koTeams && state.koTeams[m.id]) || String(m.placeholder || '').split(' - ');
+}
+function predictionLabel(pred){
+  return completedPrediction(pred) ? pred[0] + '–' + pred[1] : 'Nog niet ingevuld';
+}
+function getLiveScore(m){
+  return state.liveScores && state.liveScores[m.id] ? state.liveScores[m.id] : null;
+}
+function getMatchMinute(m){
+  if(!state.matchMinutes || !Object.prototype.hasOwnProperty.call(state.matchMinutes,m.id)) return null;
+  const minute = Number(state.matchMinutes[m.id]);
+  return Number.isFinite(minute) ? minute : null;
+}
+function getMatchGoals(m){
+  return state.matchGoals && Array.isArray(state.matchGoals[m.id]) ? state.matchGoals[m.id] : [];
+}
+function getApiStatus(m){
+  return state.matchStatuses && state.matchStatuses[m.id] ? state.matchStatuses[m.id] : null;
+}
+function isLiveStatus(status){
+  return ["IN_PLAY", "PAUSED", "LIVE"].includes(status);
+}
+function matchScheduleStatus(m){
+  const status = getApiStatus(m);
+  if(getActual(m)) return 'UITSLAG';
+  if(status === "FINISHED") return 'AFGELOPEN';
+  if(status === "PAUSED") return 'RUST';
+  if(isLiveStatus(status) || getLiveScore(m)) return 'LIVE';
+  if(status === "SUSPENDED") return 'ONDERBROKEN';
+  if(status === "POSTPONED") return 'UITGESTELD';
+  if(status === "CANCELLED") return 'AFGELAST';
+  return Date.now() >= kickoffUTCMillis(m) ? 'GESLOTEN' : 'OPEN';
+}
+function matchStatusLabel(m){
+  const status = matchScheduleStatus(m);
+  const minute = getMatchMinute(m);
+  if(status === 'LIVE' && minute !== null) return `LIVE ${minute}'`;
+  if(status === 'RUST') return 'RUST';
+  return status;
+}
+function matchScheduleStatusClass(m){
+  const status = matchScheduleStatus(m);
+  if(status === 'UITSLAG' || status === 'AFGELOPEN') return 'played';
+  if(status === 'LIVE' || status === 'RUST') return 'live';
+  return '';
+}
+function matchScoreText(m){
+  const actual = getActual(m);
+  if(actual) return { label: 'Uitslag', score: actual[0] + '–' + actual[1], className: 'final' };
+  const live = getLiveScore(m);
+  if(live) return { label: 'Live stand', score: live[0] + '–' + live[1], className: 'live' };
+  return null;
+}
+function goalMinuteLabel(goal){
+  if(!goal || goal.minute === null || goal.minute === undefined) return '';
+  return goal.minute + (goal.extraTime ? '+' + goal.extraTime : '') + "'";
+}
+function goalTypeLabel(goal){
+  if(!goal || !goal.type) return '';
+  if(goal.type === 'PENALTY') return 'pen.';
+  if(goal.type === 'OWN_GOAL') return 'e.d.';
+  return '';
+}
+function goalsHtml(m){
+  const goals = getMatchGoals(m);
+  const live = getLiveScore(m);
+  if(!goals.length){
+    return live && (Number(live[0]) + Number(live[1]) > 0)
+      ? '<div class="goal-list"><span class="goal-chip"><span>Doelpuntenmakers nog niet beschikbaar</span></span></div>'
+      : '';
+  }
+  return `<div class="goal-list">${goals.map(goal=>{
+    const minute = goalMinuteLabel(goal);
+    const type = goalTypeLabel(goal);
+    const meta = [minute, type, goal.team].filter(Boolean).join(' · ');
+    return `<span class="goal-chip">${escapeHtml(goal.scorer || 'Onbekend')}${meta ? ` <span>${escapeHtml(meta)}</span>` : ''}</span>`;
+  }).join('')}</div>`;
+}
+function liveMatchBlock(m){
+  const live = getLiveScore(m);
+  const status = matchScheduleStatus(m);
+  if(!live && !isLiveStatus(getApiStatus(m))) return '';
+  const teams = matchTeams(m);
+  const minute = matchStatusLabel(m);
+  return `<div class="live-panel">
+    <div class="live-panel-title"><span>${escapeHtml(status === 'RUST' ? 'Ruststand' : 'Live wedstrijd')}</span><span class="live-minute">${escapeHtml(minute)}</span></div>
+    <div class="live-panel-score">
+      <span>${escapeHtml(teams[0] || '')}</span>
+      <strong>${live ? live[0] + '–' + live[1] : '–'}</strong>
+      <span style="text-align:right;">${escapeHtml(teams[1] || '')}</span>
+    </div>
+    ${goalsHtml(m)}
+  </div>`;
+}
+
+let state = {
+  players: ["Jij"],
+  current: "Jij",
+  localName: null,
+  predictions: {},
+  actuals: {},
+  koTeams: {},
+  apiMatchIds: {},
+  matchStatuses: {},
+  liveScores: {},
+  matchMinutes: {},
+  matchGoals: {},
+  syncMeta: {},
+  editingActual: null,
+  editingTeams: null,
+  view: "overzicht",
+  activeGroup: "F",
+};
+
+/* ---------- CONFIG ---------- */
+// Vul hier de Web App URL in die je krijgt na het deployen van Code.gs
+// (Apps Script > Implementeren > Web app). Eindigt op /exec
+const CONFIG = {
+  API_URL: "https://script.google.com/macros/s/AKfycby86H9bAYgZ0vA_R04bEYW5TTvLWbZo2y_Gp6u97dS-h4uzJKkEyzVK8j0bpUX5s5m4GQ/exec"
+};
+
+const STORAGE_KEY = "wkpool-data-v1";
+const LOCAL_KEY = "wkpool-local-v1"; // remembers which name this device is using
+const PENDING_CHANGES_KEY = "wkpool-pending-changes-v1";
+const ADMIN_PLAYER = "Chadikzak";
+
+let lastSyncError = null;
+let lastSyncedShared = null;
+let saveTimer = null;
+let saveRetryTimer = null;
+let saveRunning = false;
+let saveRequested = false;
+
+function sharedSnapshot(source=state){
+  return JSON.parse(JSON.stringify({
+    players: source.players || [],
+    predictions: source.predictions || {},
+    actuals: source.actuals || {},
+    koTeams: source.koTeams || {},
+    apiMatchIds: source.apiMatchIds || {},
+    matchStatuses: source.matchStatuses || {},
+    liveScores: source.liveScores || {},
+    matchMinutes: source.matchMinutes || {},
+    matchGoals: source.matchGoals || {},
+    syncMeta: source.syncMeta || {}
+  }));
+}
+function updateSyncStatus(mode, text){
+  const box = document.getElementById("syncStatus");
+  const label = document.getElementById("syncText");
+  if(!box || !label) return;
+  box.className = "sync-status" + (mode ? " "+mode : "");
+  label.textContent = text || (mode==="saving" ? "Opslaan…" : mode==="error" ? "Offline" : "Gesynchroniseerd");
+}
+function collectChanges(base, local, path=[], out=[]){
+  if(JSON.stringify(base)===JSON.stringify(local)) return out;
+  const baseObj = base && typeof base==="object";
+  const localObj = local && typeof local==="object";
+  if(!baseObj || !localObj || Array.isArray(base) || Array.isArray(local)){
+    out.push({path, value:local, deleted:local===undefined});
+    return out;
+  }
+  const keys = new Set([...Object.keys(base||{}), ...Object.keys(local||{})]);
+  keys.forEach(k=>collectChanges(base?.[k], local?.[k], path.concat(k), out));
+  return out;
+}
+function applyChanges(target, changes){
+  changes.forEach(ch=>{
+    let obj=target;
+    for(let i=0;i<ch.path.length-1;i++){
+      const k=ch.path[i];
+      if(!obj[k] || typeof obj[k]!=="object") obj[k]={};
+      obj=obj[k];
+    }
+    const key=ch.path[ch.path.length-1];
+    if(ch.path.length===0) return;
+    if(ch.deleted) delete obj[key];
+    else obj[key]=JSON.parse(JSON.stringify(ch.value));
+  });
+  return target;
+}
+function hasLocalDrafts(){
+  return typeof draftPredictions !== "undefined" && Object.keys(draftPredictions).length > 0;
+}
+function clearSaveRetry(){
+  if(saveRetryTimer) clearTimeout(saveRetryTimer);
+  saveRetryTimer = null;
+}
+function persistPendingChanges(changes){
+  try{
+    if(changes && changes.length) localStorage.setItem(PENDING_CHANGES_KEY, JSON.stringify(changes));
+  }catch(e){}
+}
+function readPendingChanges(){
+  try{
+    const raw = localStorage.getItem(PENDING_CHANGES_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(e){
+    return [];
+  }
+}
+function clearPendingChanges(){
+  try{ localStorage.removeItem(PENDING_CHANGES_KEY); }catch(e){}
+}
+function scheduleSaveRetry(delay=5000){
+  clearSaveRetry();
+  updateSyncStatus("error","Opnieuw proberen…");
+  saveRetryTimer = setTimeout(()=>{
+    saveRetryTimer = null;
+    if(saveRequested && !saveRunning) flushSave(false);
+  }, delay);
+}
+async function fetchRemoteShared(){
+  const r = await fetch(CONFIG.API_URL + (CONFIG.API_URL.includes("?") ? "&" : "?") + "_=" + Date.now(), {cache:"no-store"});
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  const data = await r.json();
+  return sharedSnapshot(data);
+}
+async function loadState(){
+  if(!CONFIG.API_URL || CONFIG.API_URL.indexOf("http")!==0) return;
+  try{
+    updateSyncStatus("saving","Laden…");
+    const remote = await fetchRemoteShared();
+    Object.assign(state, remote);
+    lastSyncedShared = sharedSnapshot(remote);
+    lastSyncError = null;
+    updateSyncStatus("","Gesynchroniseerd");
+  }catch(err){
+    lastSyncError = "Laden mislukt: " + err.message;
+    updateSyncStatus("error","Offline");
+  }
+}
+function saveState(immediate){
+  saveRequested = true;
+  updateSyncStatus("saving","Opslaan…");
+  clearTimeout(saveTimer);
+  clearSaveRetry();
+  if(immediate) flushSave(true);
+  else saveTimer = setTimeout(()=>flushSave(false), 280);
+}
+async function flushSave(keepalive){
+  if(saveRunning){ saveRequested = true; return; }
+  if(!CONFIG.API_URL || CONFIG.API_URL.indexOf("http")!==0){ showToast(); return; }
+  clearSaveRetry();
+  saveRunning = true;
+  saveRequested = false;
+  let failed = false;
+  let changes = [];
+  try{
+    const local = sharedSnapshot();
+    const base = lastSyncedShared || sharedSnapshot({});
+    changes = collectChanges(base, local);
+    if(!changes.length){
+      clearPendingChanges();
+      updateSyncStatus("","Gesynchroniseerd");
+      return;
+    }
+    persistPendingChanges(changes);
+
+    // Stuur alleen de gewijzigde velden. De server verwerkt deze onder LockService,
+    // zodat gelijktijdige gebruikers elkaars andere wijzigingen niet overschrijven.
+    const r = await fetch(CONFIG.API_URL, {
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      keepalive: keepalive === true,
+      body:JSON.stringify({action:"patch", changes})
+    });
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const response = await r.json();
+    if(!response.ok) throw new Error(response.error || "Server heeft opslag geweigerd");
+    const saved = sharedSnapshot(response.data || state);
+    Object.assign(state, saved);
+    lastSyncedShared = sharedSnapshot(saved);
+    lastSyncError = null;
+    clearPendingChanges();
+    updateSyncStatus("","Gesynchroniseerd");
+    showToast();
+  }catch(err){
+    failed = true;
+    saveRequested = true;
+    persistPendingChanges(changes);
+    lastSyncError = "Opslaan mislukt: " + err.message;
+    updateSyncStatus("error","Opnieuw proberen…");
+    showToast(true);
+  }finally{
+    saveRunning = false;
+    if(saveRequested){
+      if(failed) scheduleSaveRetry();
+      else flushSave(false);
+    }
+  }
+}
+
+function loadLocalName(){
+  return new Promise(resolve=>{
+    try{
+      const v = localStorage.getItem(LOCAL_KEY);
+      resolve(v || null);
+    }catch(e){
+      resolve(null);
+    }
+  });
+}
+
+function saveLocalName(name){
+  state.localName = name;
+  try{
+    localStorage.setItem(LOCAL_KEY, name);
+  }catch(e){}
+}
+function isAdmin(){
+  return state.localName === ADMIN_PLAYER;
+}
+
+let toastTimer=null;
+function showToast(isError){
+  const t = document.getElementById("toast");
+  if(isError){
+    t.textContent = "Niet opgeslagen — controleer je verbinding";
+    t.style.background = "var(--red)";
+    t.style.color = "#fff";
+  } else {
+    t.textContent = "Opgeslagen ✓";
+    t.style.background = "var(--accent2)";
+    t.style.color = "#06251a";
+  }
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove("show"), isError?3000:1100);
+}
+
+function getActual(m){
+  const override = state.actuals && state.actuals[m.id];
+  if(override) return override;
+  return m.actual;
+}
+// 5 punten: exacte uitslag
+// 3 punten: juiste verschil (bv. 2-1 voorspeld, 3-2 werkelijk)
+// 1 punt: juiste uitkomst (winst/gelijk/verlies), verschil niet juist
+// 0 punten: fout
+function calcPoints(pred, actual){
+  if(!pred || !actual) return null;
+  const [ph,pa] = pred;
+  const [ah,aa] = actual;
+  if(ph===""||pa===""||ph===null||pa===null) return null;
+  const PH=Number(ph), PA=Number(pa), AH=Number(ah), AA=Number(aa);
+  if(isNaN(PH)||isNaN(PA)) return null;
+  if(PH===AH && PA===AA) return 5;
+  const predDiff = PH-PA;
+  const actDiff = AH-AA;
+  const predOutcome = Math.sign(predDiff);
+  const actOutcome = Math.sign(actDiff);
+  if(predOutcome!==actOutcome) return 0;
+  if(predDiff===actDiff) return 3;
+  return 1;
+}
+
+const draftPredictions = {};
+const draftTouches = {};
+const draftSaveTimers = {};
+function draftKey(player, matchId){ return player + "||" + matchId; }
+
+function getPred(player, matchId){
+  const key = draftKey(player, matchId);
+  if(Object.prototype.hasOwnProperty.call(draftPredictions, key)) return draftPredictions[key];
+  const p = state.predictions[player];
+  if(!p) return [null,null];
+  return p[matchId] || [null,null];
+}
+
+function setPred(player, matchId, idx, val){
+  const key = draftKey(player, matchId);
+  const current = getPred(player, matchId).slice();
+  current[idx] = val;
+  draftPredictions[key] = current;
+  if(!draftTouches[key]) draftTouches[key] = {};
+  draftTouches[key][idx] = true;
+
+  const status = draftPredictionStatus(current);
+  updateSyncStatus(status.type, status.text);
+  scheduleDraftCommit(player, matchId);
+}
+
+function draftPredictionStatus(pred){
+  const home = pred ? pred[0] : null;
+  const away = pred ? pred[1] : null;
+  const homeEmpty = home === null || home === "";
+  const awayEmpty = away === null || away === "";
+  if(homeEmpty && awayEmpty) return {type:"saving", text:"Lokaal verwijderen"};
+  if(homeEmpty || awayEmpty) return {type:"saving", text:"Nog één score invullen"};
+
+  const h = Number(home), a = Number(away);
+  if(!Number.isInteger(h) || !Number.isInteger(a) || h < 0 || a < 0 || h > 30 || a > 30){
+    return {type:"error", text:"Controleer score"};
+  }
+  return {type:"saving", text:"Lokaal concept"};
+}
+
+function clearDraftCommitTimer(key){
+  if(draftSaveTimers[key]) clearTimeout(draftSaveTimers[key]);
+  delete draftSaveTimers[key];
+}
+
+function canAutoCommitDraft(key, pred){
+  const status = draftPredictionStatus(pred);
+  const touched = draftTouches[key] || {};
+  return touched[0] && touched[1] && (status.text === "Lokaal concept" || status.text === "Lokaal verwijderen");
+}
+
+function scheduleDraftCommit(player, matchId){
+  const key = draftKey(player, matchId);
+  clearDraftCommitTimer(key);
+  if(!canAutoCommitDraft(key, draftPredictions[key])) return;
+
+  draftSaveTimers[key] = setTimeout(()=>{
+    delete draftSaveTimers[key];
+    commitDraftPrediction(player, matchId, false);
+  }, 900);
+}
+
+function commitDraftPrediction(player, matchId, immediate=true){
+  const key = draftKey(player, matchId);
+  if(!Object.prototype.hasOwnProperty.call(draftPredictions, key)) return false;
+  clearDraftCommitTimer(key);
+
+  const current = draftPredictions[key].slice();
+
+  const [home, away] = current;
+  const homeEmpty = home === null || home === "";
+  const awayEmpty = away === null || away === "";
+  const bothEmpty = homeEmpty && awayEmpty;
+  const bothFilled = !homeEmpty && !awayEmpty && Number.isInteger(Number(home)) && Number.isInteger(Number(away));
+
+  if(bothFilled){
+    const h = Number(home), a = Number(away);
+    if(h < 0 || a < 0 || h > 30 || a > 30){
+      draftPredictions[key] = current;
+      updateSyncStatus("error","Controleer score");
+      return false;
+    }
+    if(!state.predictions[player]) state.predictions[player]={};
+    state.predictions[player][matchId] = [h, a];
+    delete draftPredictions[key];
+    delete draftTouches[key];
+    saveState(immediate);
+    return true;
+  } else if(bothEmpty){
+    const hadPrediction = state.predictions[player] && Object.prototype.hasOwnProperty.call(state.predictions[player], matchId);
+    if(state.predictions[player] && Object.prototype.hasOwnProperty.call(state.predictions[player], matchId)){
+      delete state.predictions[player][matchId];
+    }
+    delete draftPredictions[key];
+    delete draftTouches[key];
+    if(hadPrediction) saveState(immediate);
+    return hadPrediction;
+  } else {
+    draftPredictions[key] = current;
+    updateSyncStatus("saving","Nog één score invullen");
+    return false;
+  }
+}
+
+function commitAllCompleteDrafts(immediate=true){
+  let changed = false;
+  Object.keys(draftPredictions).forEach(key=>{
+    const splitAt = key.indexOf("||");
+    if(splitAt < 0) return;
+    const player = key.slice(0, splitAt);
+    const matchId = key.slice(splitAt + 2);
+    const pred = draftPredictions[key];
+    const status = draftPredictionStatus(pred);
+    if(status.text === "Lokaal concept" || status.text === "Lokaal verwijderen"){
+      if(commitDraftPrediction(player, matchId, immediate)) changed = true;
+    }
+  });
+  return changed;
+}
+
+function finalPoints(player, match, raw){ return raw; }
+function completedPrediction(pred){ return pred && pred[0]!==null && pred[0]!=='' && pred[1]!==null && pred[1]!==''; }
+function otherPredictionsHtml(match){
+  if(!isLocked(match)) return '';
+  const picks=state.players.map(p=>({p,pred:getPred(p,match.id)})).filter(x=>completedPrediction(x.pred));
+  if(!picks.length) return '';
+  return `<div class="other-picks">${picks.map(x=>`<span class="pick-chip"><b>${escapeHtml(x.p)}</b> ${x.pred[0]}–${x.pred[1]}</span>`).join('')}</div>`;
+}
+
+/* ---------- RENDER ---------- */
+function render(){
+  if(state.view==="spelers" && !isAdmin()) state.view="overzicht";
+  renderTabs();
+  if(state.view==="overzicht") renderOverzicht();
+  else if(state.view==="groep") renderGroepen();
+  else if(state.view==="knockout") renderKnockout();
+  else if(state.view==="stand") renderStand();
+  else if(state.view==="prijzen") renderPrijzen();
+  else if(state.view==="spelers") renderSpelers();
+  else if(state.view==="regels") renderRegels();
+}
+
+function renderTabs(){
+  const tabs = document.getElementById("tabs");
+  const items = [
+    {id:"overzicht", label:"Overzicht"},
+    {id:"groep", label:"Groepen"},
+    {id:"knockout", label:"Knock-out"},
+    {id:"stand", label:"Stand"},
+    {id:"prijzen", label:"Prijzen"},
+    {id:"regels", label:"Regels"},
+  ];
+  if(isAdmin()) items.splice(items.length - 1, 0, {id:"spelers", label:"Spelers"});
+  tabs.innerHTML = items.map(it=>
+    `<button class="tab ${state.view===it.id?'active':''}" data-tab="${it.id}"><span class="tab-label">${it.label}</span></button>`
+  ).join("");
+  tabs.querySelectorAll(".tab").forEach(btn=>{
+    btn.onclick = ()=>{ state.view = btn.dataset.tab; render(); };
+  });
+}
+
+function renderCurrentUserBar(){
+  const adminSwitch = isAdmin()
+    ? '<span id="switchUserBtn" style="color:var(--accent);font-weight:650;cursor:pointer;font-size:0.85rem;">Wisselen</span>'
+    : '';
+  return `<div class="rules-box" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:14px;">
+    <span>Actief: <b style="color:var(--accent2);font-weight:650;">${escapeHtml(state.current)}</b>${isAdmin() && state.current!==state.localName ? ' <small style="color:var(--muted);font-weight:600;">admin</small>' : ''}</span>
+    ${adminSwitch}
+  </div>`;
+}
+
+function renderOverzicht(){
+  const main=document.getElementById("main");
+  document.getElementById("subhead").textContent=`${state.current} · overzicht`;
+  const all=MATCHES.concat(KNOCKOUT_MATCHES.filter(m=>state.koTeams&&state.koTeams[m.id]));
+  const available=all.filter(m=>!isLocked(m));
+  const filled=available.filter(m=>completedPrediction(getPred(state.current,m.id))).length;
+  const pct=available.length?Math.round(filled/available.length*100):100;
+  const played=all.filter(m=>getActual(m));
+  let total=0; played.forEach(m=>{const raw=calcPoints(getPred(state.current,m.id),getActual(m));if(raw!==null)total+=finalPoints(state.current,m,raw);});
+  const rows=state.players.map(p=>{let t=0;played.forEach(m=>{const r=calcPoints(getPred(p,m.id),getActual(m));if(r!==null)t+=finalPoints(p,m,r)});return {p,t}}).sort((a,b)=>b.t-a.t);
+  const rank=Math.max(1,rows.findIndex(r=>r.p===state.current)+1);
+
+  const sorted=all.slice().sort((a,b)=>kickoffUTCMillis(a)-kickoffUTCMillis(b));
+  const todayKey=amsterdamDateKeyFromMillis(Date.now());
+  let scheduleKey=null;
+  const todayMatches=sorted.filter(m=>matchDateKey(m)===todayKey);
+  if(todayMatches.length){
+    scheduleKey=todayKey;
+  } else {
+    const next=sorted.find(m=>!getActual(m) && kickoffUTCMillis(m)>=Date.now());
+    scheduleKey=next ? matchDateKey(next) : null;
+  }
+  const schedule=scheduleKey ? sorted.filter(m=>matchDateKey(m)===scheduleKey && !getActual(m)) : [];
+  const scheduleLabel=schedule.length ? matchDayLabel(schedule[0]) : '';
+  const liveMatches=sorted.filter(m=>matchScheduleStatus(m)==='LIVE' || matchScheduleStatus(m)==='RUST');
+
+  let html=renderCurrentUserBar();
+  html+=`<div class="dashboard-grid"><div class="stat-card"><div class="stat-value">${total}</div><div class="stat-label">Punten</div></div><div class="stat-card"><div class="stat-value">#${rank}</div><div class="stat-label">Positie</div></div><div class="stat-card"><div class="stat-value">${filled}/${available.length}</div><div class="stat-label">Open ingevuld</div></div></div>`;
+  html+=`<div class="rules-box"><b>${filled}/${available.length} ingevuld</b><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div><span>${available.length-filled ? (available.length-filled)+' open' : 'Alles ingevuld'}</span></div>`;
+
+  if(liveMatches.length){
+    html+=`<div class="section-title"><span>Nu live</span></div>`;
+    liveMatches.forEach(m=>{ html+=liveMatchBlock(m); });
+  }
+
+  html+=`<div class="section-title"><span>Speelschema</span><button class="mini-btn" id="goGroups">Alle wedstrijden</button></div>`;
+
+  if(!schedule.length){
+    html+=`<div class="empty">Geen komende wedstrijden.</div>`;
+  } else {
+    html+=`<div class="rules-box schedule-note"><b>${scheduleLabel}</b><br>Nederlandse tijd. Nachtwedstrijden staan op hun startdatum.</div>`;
+    html+=`<div class="group-card schedule-list">`;
+    schedule.forEach(m=>{
+      const pred=getPred(state.current,m.id);
+      const teams=matchTeams(m);
+      const status=matchScheduleStatus(m);
+      const statusClass=matchScheduleStatusClass(m);
+      const predText=predictionLabel(pred);
+      const score = matchScoreText(m);
+      const scoreHtml = score ? `<span>${score.label}</span><b class="schedule-score ${score.className}">${score.score}</b>` : `<span>Jouw voorspelling</span><b>${predText}</b>`;
+      html+=`<div class="match schedule-match ${statusClass==='played'?'played':''}"><div class="schedule-top"><span><span class="schedule-time">${m.time}</span> <span class="schedule-id">${m.id}</span></span><span class="match-status ${statusClass}">${escapeHtml(matchStatusLabel(m))}</span></div><div class="teams-row"><div class="team-name">${escapeHtml(teams[0]||'')}</div><div class="score-inputs"><input type="number" min="0" max="20" inputmode="numeric" data-match="${m.id}" data-idx="0" value="${pred[0]??''}" ${isLocked(m)?'disabled':''}><span class="dash">–</span><input type="number" min="0" max="20" inputmode="numeric" data-match="${m.id}" data-idx="1" value="${pred[1]??''}" ${isLocked(m)?'disabled':''}></div><div class="team-name right">${escapeHtml(teams[1]||'')}</div></div>${statusClass==='live' ? goalsHtml(m) : ''}<div class="schedule-pick">${scoreHtml}</div>${score ? `<div class="schedule-pick"><span>Jouw voorspelling</span><b>${predText}</b></div>` : ''}${isLocked(m) ? otherPredictionsHtml(m) : ''}</div>`;
+    });
+    html+=`</div>`;
+  }
+
+  main.innerHTML=html;bindCommonHandlers();
+  const gg=document.getElementById('goGroups');if(gg)gg.onclick=()=>{state.view='groep';render()};
+  bindPredictionHandlers(main,false);
+}
+function bindPredictionHandlers(root,rerender=true){
+  root.querySelectorAll('input[data-match]').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const val=inp.value===''?null:inp.value;
+      setPred(state.current,inp.dataset.match,Number(inp.dataset.idx),val);
+    });
+    inp.addEventListener('keydown',(ev)=>{
+      if(ev.key==="Enter"){
+        ev.preventDefault();
+        commitDraftPrediction(state.current,inp.dataset.match,true);
+        inp.blur();
+      }
+    });
+    inp.addEventListener('focusout',()=>{
+      const player = state.current;
+      const matchId = inp.dataset.match;
+      setTimeout(()=>{
+        const active = document.activeElement;
+        const stillEditingSameMatch = active && active.dataset && active.dataset.match === matchId;
+        if(!stillEditingSameMatch) commitDraftPrediction(player,matchId,true);
+      },0);
+    });
+  });
+}
+
+function renderGroepen(){
+  const main = document.getElementById("main");
+  document.getElementById("subhead").textContent = `Groepsfase · voorspelling van ${state.current}`;
+
+  let html = renderCurrentUserBar();
+  const openCount=MATCHES.filter(m=>!isLocked(m)&&!completedPrediction(getPred(state.current,m.id))).length;
+  const filledCount=MATCHES.filter(m=>!isLocked(m)&&completedPrediction(getPred(state.current,m.id))).length;
+  const totalOpen=filledCount+openCount;
+  html += `<div class="rules-box"><b>${filledCount} van ${totalOpen} open groepswedstrijden ingevuld</b><div class="progress-track"><div class="progress-fill" style="width:${totalOpen?Math.round(filledCount/totalOpen*100):100}%"></div></div>${openCount ? openCount+' nog te voorspellen.' : 'Alles ingevuld ✓'}</div>`;
+
+  html += `<div class="legend">
+    <span><span class="dot green"></span> al gespeeld – telt voor iedereen mee</span>
+    <span><span class="dot gold"></span> behaalde punten</span>
+  </div>`;
+
+  // group tabs
+  html += `<div class="player-select" style="margin-bottom:10px;">`;
+  Object.keys(GROUP_TEAMS).forEach(g=>{
+    html += `<button class="player-chip ${g===state.activeGroup?'active':''}" data-group="${g}">Groep ${g}</button>`;
+  });
+  html += `</div>`;
+
+  const groupMatches = MATCHES.filter(m=>m.group===state.activeGroup);
+  const teams = GROUP_TEAMS[state.activeGroup].join(" · ");
+
+  html += `<div class="group-card">
+    <div class="group-head"><span>Groep ${state.activeGroup}</span><span class="teams">${teams}</span></div>`;
+
+  groupMatches.forEach(m=>{
+    const pred = getPred(state.current, m.id);
+    const actual = getActual(m);
+    const played = !!actual;
+    const locked = isLocked(m);
+    const rawPoints = played ? calcPoints(pred, actual) : null;
+    const points = played ? finalPoints(state.current,m,rawPoints) : null;
+
+    html += `<div class="match ${played?'played':''}">
+      <div class="match-top">
+        <span>${m.date} · ${m.time}</span>
+        <span class="match-status ${played?'played':''}">${played?'GESPEELD':(locked?'GESLOTEN':'NOG TE SPELEN')}</span>
+      </div>
+      <div class="teams-row">
+        <div class="team-name">${m.home}</div>
+        <div class="score-inputs">
+          <input type="number" min="0" max="20" inputmode="numeric" data-match="${m.id}" data-idx="0" value="${pred[0]??''}" ${locked?'disabled':''}>
+          <span class="dash">–</span>
+          <input type="number" min="0" max="20" inputmode="numeric" data-match="${m.id}" data-idx="1" value="${pred[1]??''}" ${locked?'disabled':''}>
+        </div>
+        <div class="team-name right">${m.away}</div>
+      </div>${otherPredictionsHtml(m)}`;
+
+    if(!played && locked){
+      html += `<div class="actual-row"><span class="lbl">Voorspelling vergrendeld – wedstrijd is begonnen</span></div>`;
+      html += `<div class="actual-row" style="margin-top:4px;">
+        <span class="lbl">Uitslag invullen:</span>
+        <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="0" value="">
+        <span class="dash">–</span>
+        <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="1" value="">
+        <button class="save-actual-btn" data-saveactual="${m.id}" style="padding:6px 12px;border-radius:8px;border:none;background:var(--accent);color:#1a1300;font-weight:700;font-size:0.75rem;">Opslaan</button>
+      </div>`;
+    }
+
+    if(played){
+      html += `<div class="actual-row">
+        <span class="lbl">Uitslag</span>
+        <span style="font-weight:800;color:var(--accent2);font-size:1rem;">${actual[0]} – ${actual[1]}</span>
+        <span class="edit-actual-link" data-editactual="${m.id}" style="color:var(--muted);font-size:0.7rem;text-decoration:underline;margin-left:6px;">wijzig</span>
+      </div>`;
+      if(points!==null){
+        html += `<div class="points-pill ${points===0?'zero':''}">${points} punten</div>`;
+      } else {
+        html += `<div class="points-pill zero">geen voorspelling</div>`;
+      }
+      if(state.editingActual===m.id){
+        html += `<div class="actual-row" style="margin-top:4px;">
+          <span class="lbl">Nieuwe uitslag:</span>
+          <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="0" value="${actual[0]}">
+          <span class="dash">–</span>
+          <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="1" value="${actual[1]}">
+          <button class="save-actual-btn" data-saveactual="${m.id}" style="padding:6px 12px;border-radius:8px;border:none;background:var(--accent);color:#1a1300;font-weight:700;font-size:0.75rem;">Opslaan</button>
+        </div>`;
+      }
+    }
+
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+
+  main.innerHTML = html;
+  bindCommonHandlers();
+
+  main.querySelectorAll('[data-group]').forEach(btn=>{
+    btn.onclick = ()=>{ state.activeGroup = btn.dataset.group; render(); };
+  });
+
+  bindPredictionHandlers(main,true);
+
+  main.querySelectorAll('[data-saveactual]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const mid = btn.dataset.saveactual;
+      const inputs = main.querySelectorAll(`input[data-actual="${mid}"]`);
+      const h = inputs[0].value, a = inputs[1].value;
+      if(h==="" || a===""){ return; }
+      if(!state.actuals) state.actuals = {};
+      state.actuals[mid] = [Number(h), Number(a)];
+      state.editingActual = null;
+      saveState();
+      render();
+    };
+  });
+
+  main.querySelectorAll('[data-editactual]').forEach(el=>{
+    el.onclick = ()=>{
+      state.editingActual = (state.editingActual===el.dataset.editactual) ? null : el.dataset.editactual;
+      render();
+    };
+  });
+}
+
+function renderStand(){
+  const main = document.getElementById("main");
+  document.getElementById("subhead").textContent = "Tussenstand poule";
+
+  const ALL_MATCHES = MATCHES.concat(KNOCKOUT_MATCHES);
+  const playedMatches = ALL_MATCHES.filter(m=>getActual(m));
+
+  let rows = state.players.map(p=>{
+    let total=0, exact=0, correctDiff=0, scoringMatches=0, played=0;
+    playedMatches.forEach(m=>{
+      const pred = getPred(p, m.id);
+      const pts = calcPoints(pred, getActual(m));
+      if(pts!==null){
+        total += pts;
+        played++;
+        if(pts===5) exact++;
+        if(pts===3) correctDiff++;
+        if(pts>0) scoringMatches++;
+      }
+    });
+    return {player:p, total, exact, correctDiff, scoringMatches, played};
+  });
+
+  rows.sort((a,b)=>
+    b.total-a.total ||
+    b.exact-a.exact ||
+    b.correctDiff-a.correctDiff ||
+    b.scoringMatches-a.scoringMatches
+  );
+
+  rows.forEach((row,i)=>{
+    if(i===0){
+      row.rank = 1;
+      return;
+    }
+    const prev = rows[i-1];
+    const tied = row.total===prev.total &&
+      row.exact===prev.exact &&
+      row.correctDiff===prev.correctDiff &&
+      row.scoringMatches===prev.scoringMatches;
+    row.rank = tied ? prev.rank : i+1;
+  });
+
+  const PRIZES = ["🥇 Gratis diner (de rest trakteert)","🥈 Gratis drinken bij het eten","🥉 Mag de eetplek uitkiezen"];
+
+  let html = `<div class="rules-box">
+    <b>${playedMatches.length}</b> van de 104 wedstrijden (groepsfase + knock-out) zijn al gespeeld of hebben een ingevulde uitslag. Punten worden automatisch berekend op basis van de uitslagen en de voorspellingen die zijn ingevuld.
+  </div>`;
+
+  if(playedMatches.length===0){
+    html += `<div class="empty">Nog geen wedstrijden gespeeld of voorspellingen ingevuld.</div>`;
+  } else {
+    html += `<table class="lb-table">
+      <thead><tr><th>#</th><th>Speler</th><th>Wedstrijden</th><th>5/5</th><th>Punten</th></tr></thead>
+      <tbody>`;
+    rows.forEach(r=>{
+      const prize = r.rank<=3 ? `<div style="font-size:0.7rem;color:var(--accent);font-weight:700;margin-top:2px;">${PRIZES[r.rank-1]}</div>` : "";
+      const tieInfo = `<div style="font-size:0.66rem;color:var(--muted);margin-top:3px;line-height:1.35;">${r.exact} exact · ${r.correctDiff} juist saldo · ${r.scoringMatches} raak</div>`;
+      html += `<tr class="${r.player===state.current?'you':''}">
+        <td class="rank">${r.rank}</td>
+        <td>${escapeHtml(r.player)}${prize}${tieInfo}</td>
+        <td>${r.played}/${playedMatches.length}</td>
+        <td>${r.exact}</td>
+        <td class="points">${r.total}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  }
+
+  main.innerHTML = html;
+}
+
+function renderKnockout(){
+  const main = document.getElementById("main");
+  document.getElementById("subhead").textContent = `Knock-outfase · voorspelling van ${state.current}`;
+
+  let html = renderCurrentUserBar();
+
+  const groupStageDone = MATCHES.every(m=>getActual(m));
+
+  html += `<div class="rules-box">
+    De knock-outfase begint pas na de groepsfase (28 juni). De tegenstanders staan nu nog als placeholder (bv. "Winnaar Poule A"). Zodra bekend is wie er speelt, kan iedereen de echte teamnamen invullen via "wijzig teams" — daarna kun je voorspellen.
+    ${groupStageDone ? '' : '<br><br><b>De groepsfase is nog niet afgerond</b>, dus deze wedstrijden zijn nog vergrendeld voor voorspellingen totdat de teams bekend zijn.'}
+  </div>`;
+
+  let currentRound = "";
+  KNOCKOUT_MATCHES.forEach(m=>{
+    if(m.round !== currentRound){
+      if(currentRound !== ""){ html += `</div>`; }
+      currentRound = m.round;
+      html += `<div class="group-card"><div class="group-head"><span>${m.round}</span></div>`;
+    }
+
+    const teams = (state.koTeams && state.koTeams[m.id]) || null;
+    const hasTeams = !!teams;
+    const pred = getPred(state.current, m.id);
+    const actual = getActual(m);
+    const played = !!actual;
+    const locked = isKOLocked(m) || !hasTeams;
+    const rawPoints = played ? calcPoints(pred, actual) : null;
+    const points = played ? finalPoints(state.current,m,rawPoints) : null;
+
+    const homeLabel = hasTeams ? teams[0] : m.placeholder.split(" - ")[0];
+    const awayLabel = hasTeams ? teams[1] : m.placeholder.split(" - ")[1];
+
+    html += `<div class="match ${played?'played':''}">
+      <div class="match-top">
+        <span>${m.date} · ${m.time}</span>
+        <span class="match-status ${played?'played':''}">${played?'GESPEELD':(locked?'GESLOTEN':'NOG TE SPELEN')}</span>
+      </div>
+      <div class="teams-row">
+        <div class="team-name" style="font-size:${hasTeams?'0.95rem':'0.75rem'};color:${hasTeams?'var(--text)':'var(--muted)'};">${escapeHtml(homeLabel)}</div>
+        <div class="score-inputs">
+          <input type="number" min="0" max="20" inputmode="numeric" data-match="${m.id}" data-idx="0" value="${pred[0]??''}" ${locked?'disabled':''}>
+          <span class="dash">–</span>
+          <input type="number" min="0" max="20" inputmode="numeric" data-match="${m.id}" data-idx="1" value="${pred[1]??''}" ${locked?'disabled':''}>
+        </div>
+        <div class="team-name right" style="font-size:${hasTeams?'0.95rem':'0.75rem'};color:${hasTeams?'var(--text)':'var(--muted)'};">${escapeHtml(awayLabel)}</div>
+      </div>${otherPredictionsHtml(m)}
+      <div class="actual-row" style="justify-content:space-between;">
+        <span class="lbl edit-actual-link" data-editteams="${m.id}" style="text-decoration:underline;cursor:pointer;">wijzig teams</span>
+      </div>`;
+
+    if(state.editingTeams===m.id){
+      html += `<div class="actual-row" style="margin-top:4px;gap:6px;">
+        <input type="text" data-teamname="${m.id}" data-idx="0" placeholder="Team 1" value="${hasTeams?escapeAttr(teams[0]):''}" style="flex:1;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:0.8rem;">
+        <input type="text" data-teamname="${m.id}" data-idx="1" placeholder="Team 2" value="${hasTeams?escapeAttr(teams[1]):''}" style="flex:1;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:0.8rem;">
+        <button class="save-actual-btn" data-saveteams="${m.id}" style="padding:6px 12px;border-radius:8px;border:none;background:var(--accent);color:#1a1300;font-weight:700;font-size:0.75rem;">Opslaan</button>
+      </div>`;
+    }
+
+    if(!played && !locked){
+      // teams known, not yet played -> nothing extra
+    }
+
+    if(hasTeams && !played && isKOLocked(m)){
+      html += `<div class="actual-row" style="margin-top:4px;">
+        <span class="lbl">Uitslag invullen:</span>
+        <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="0" value="">
+        <span class="dash">–</span>
+        <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="1" value="">
+        <button class="save-actual-btn" data-saveactual="${m.id}" style="padding:6px 12px;border-radius:8px;border:none;background:var(--accent);color:#1a1300;font-weight:700;font-size:0.75rem;">Opslaan</button>
+      </div>`;
+    }
+
+    if(played){
+      html += `<div class="actual-row">
+        <span class="lbl">Uitslag</span>
+        <span style="font-weight:800;color:var(--accent2);font-size:1rem;">${actual[0]} – ${actual[1]}</span>
+        <span class="edit-actual-link" data-editactual="${m.id}" style="color:var(--muted);font-size:0.7rem;text-decoration:underline;margin-left:6px;">wijzig</span>
+      </div>`;
+      if(points!==null){
+        html += `<div class="points-pill ${points===0?'zero':''}">${points} punten</div>`;
+      } else {
+        html += `<div class="points-pill zero">geen voorspelling</div>`;
+      }
+      if(state.editingActual===m.id){
+        html += `<div class="actual-row" style="margin-top:4px;">
+          <span class="lbl">Nieuwe uitslag:</span>
+          <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="0" value="${actual[0]}">
+          <span class="dash">–</span>
+          <input type="number" min="0" max="20" inputmode="numeric" data-actual="${m.id}" data-idx="1" value="${actual[1]}">
+          <button class="save-actual-btn" data-saveactual="${m.id}" style="padding:6px 12px;border-radius:8px;border:none;background:var(--accent);color:#1a1300;font-weight:700;font-size:0.75rem;">Opslaan</button>
+        </div>`;
+      }
+    }
+
+    html += `</div>`;
+  });
+  html += `</div>`;
+
+  main.innerHTML = html;
+  bindCommonHandlers();
+  bindKnockoutHandlers(main);
+}
+
+function bindKnockoutHandlers(main){
+  bindPredictionHandlers(main,false);
+
+  main.querySelectorAll('[data-editteams]').forEach(el=>{
+    el.onclick = ()=>{
+      state.editingTeams = (state.editingTeams===el.dataset.editteams) ? null : el.dataset.editteams;
+      render();
+    };
+  });
+
+  main.querySelectorAll('[data-saveteams]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const mid = btn.dataset.saveteams;
+      const inputs = main.querySelectorAll(`input[data-teamname="${mid}"]`);
+      const t1 = inputs[0].value.trim(), t2 = inputs[1].value.trim();
+      if(!t1 || !t2) return;
+      if(!state.koTeams) state.koTeams = {};
+      state.koTeams[mid] = [t1, t2];
+      state.editingTeams = null;
+      saveState();
+      render();
+    };
+  });
+
+  main.querySelectorAll('[data-saveactual]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const mid = btn.dataset.saveactual;
+      const inputs = main.querySelectorAll(`input[data-actual="${mid}"]`);
+      const h = inputs[0].value, a = inputs[1].value;
+      if(h==="" || a===""){ return; }
+      if(!state.actuals) state.actuals = {};
+      state.actuals[mid] = [Number(h), Number(a)];
+      state.editingActual = null;
+      saveState();
+      render();
+    };
+  });
+
+  main.querySelectorAll('[data-editactual]').forEach(el=>{
+    el.onclick = ()=>{
+      state.editingActual = (state.editingActual===el.dataset.editactual) ? null : el.dataset.editactual;
+      render();
+    };
+  });
+}
+
+
+function renderPrijzen(){
+  const main = document.getElementById("main");
+  document.getElementById("subhead").textContent = "Top 3 prijzen";
+
+  main.innerHTML = `
+  <div class="rules-box">
+    <b>1e plaats · diner</b><br>
+    De winnaar eet gratis. De rest deelt de kosten.
+  </div>
+  <div class="rules-box">
+    <b>2e plaats · drinken</b><br>
+    Drankjes tijdens het eten zijn gratis.
+  </div>
+  <div class="rules-box">
+    <b>3e plaats · locatie</b><br>
+    De nummer 3 kiest waar jullie eten.
+  </div>
+  <div class="rules-box">
+    De eindstand staat onder Stand.
+  </div>`;
+}
+
+function renderSpelers(){
+  const main = document.getElementById("main");
+  document.getElementById("subhead").textContent = "Spelers beheren";
+
+  let html = `<div class="manage-row">
+    <input type="text" id="newPlayerName" placeholder="Naam van vriend(in)">
+    <button id="addPlayerBtn">Toevoegen</button>
+  </div>`;
+
+  state.players.forEach(p=>{
+    html += `<div class="player-row">
+      <input type="text" class="rename-input" data-rename="${escapeAttr(p)}" value="${escapeAttr(p)}" style="flex:1;margin-right:8px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:0.9rem;">
+      ${state.players.length>1?`<span class="remove" data-remove="${escapeAttr(p)}">Verwijderen</span>`:''}
+    </div>`;
+  });
+
+  html += `<div class="rules-box" style="margin-top:14px;">
+    Alleen admin. Namen aanpassen werkt direct door in de stand en voorspellingen.
+  </div>`;
+
+  main.innerHTML = html;
+
+  document.getElementById("addPlayerBtn").onclick = ()=>{
+    const input = document.getElementById("newPlayerName");
+    const name = input.value.trim();
+    if(name && !state.players.includes(name)){
+      state.players.push(name);
+      saveState();
+      render();
+    }
+  };
+
+  main.querySelectorAll('.rename-input').forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const oldName = inp.dataset.rename;
+      const newName = inp.value.trim();
+      if(!newName || newName===oldName) { inp.value = oldName; return; }
+      if(state.players.includes(newName)){ inp.value = oldName; return; }
+      // rename in players list
+      state.players = state.players.map(p=>p===oldName?newName:p);
+      // move predictions
+      if(state.predictions[oldName]){
+        state.predictions[newName] = state.predictions[oldName];
+        delete state.predictions[oldName];
+      }
+      if(state.current===oldName) state.current = newName;
+      if(state.localName===oldName) state.localName = newName;
+      saveLocalName(newName);
+      saveState();
+      render();
+    });
+  });
+
+  main.querySelectorAll('[data-remove]').forEach(el=>{
+    el.onclick = ()=>{
+      const name = el.dataset.remove;
+      state.players = state.players.filter(p=>p!==name);
+      delete state.predictions[name];
+      if(state.current===name) state.current = state.players[0];
+      saveState();
+      render();
+    };
+  });
+}
+
+function renderRegels(){
+  const main = document.getElementById("main");
+  document.getElementById("subhead").textContent = "Spelregels";
+
+  let configWarning = "";
+  if(!CONFIG.API_URL || CONFIG.API_URL.indexOf("http")!==0){
+    configWarning = `<div class="rules-box" style="border-color:var(--red);">
+      <b style="color:var(--red);">Niet verbonden</b><br>
+      Vul <code>CONFIG.API_URL</code> met de Apps Script Web App URL.
+    </div>`;
+  } else if(lastSyncError){
+    configWarning = `<div class="rules-box" style="border-color:var(--red);">
+      <b style="color:var(--red);">Verbinding mislukt</b><br>
+      ${escapeHtml(lastSyncError)}
+    </div>`;
+  } else {
+    configWarning = `<div class="rules-box" style="border-color:var(--accent2);">
+      <b style="color:var(--accent2);">Verbonden</b>
+    </div>`;
+  }
+
+  main.innerHTML = configWarning + `
+  <div class="rules-box">
+    <b>Automatische uitslagen</b><br>
+    Live standen worden gevolgd. Definitieve punten tellen pas na status <b>afgelopen</b>.
+  </div>
+  <div class="rules-box">
+    <b>Punten</b>
+    <ul>
+      <li><b>5</b> exact</li>
+      <li><b>3</b> juiste uitkomst en saldo</li>
+      <li><b>1</b> juiste uitkomst</li>
+      <li><b>0</b> mis</li>
+    </ul>
+  </div>
+  <div class="rules-box">
+    <b>Gelijke stand</b><br>
+    <ol style="margin:8px 0 0;padding-left:20px;">
+      <li>meeste exacte uitslagen;</li>
+      <li>daarna meeste 3-punters;</li>
+      <li>daarna meeste scorende voorspellingen.</li>
+    </ol>
+    <div style="margin-top:8px;">Blijft het gelijk, dan delen spelers de plek.</div>
+  </div>
+  <div class="rules-box">
+    <b>Al gespeelde wedstrijden</b><br>
+    Gespeelde wedstrijden hebben een vaste uitslag. Punten worden automatisch berekend.
+  </div>
+  <div class="rules-box">
+    <b>Gebruik</b><br>
+    Kies je naam, vul scores in en volg de stand. Knock-outwedstrijden komen erbij zodra de teams bekend zijn.
+  </div>`;
+}
+
+function bindCommonHandlers(){
+  const sw = document.getElementById("switchUserBtn");
+  if(sw) sw.onclick = ()=>{ renderLogin(); };
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function escapeAttr(s){ return escapeHtml(s); }
+
+/* ---------- LOGIN ---------- */
+function renderLogin(){
+  const main = document.getElementById("main");
+  document.getElementById("tabs").style.display = "none";
+  document.getElementById("subhead").textContent = "Wie ben jij?";
+
+  let html = `<div class="rules-box">Kies je naam. Dit onthouden we op dit toestel.</div>`;
+  html += `<div class="player-select">${state.players.map(p=>
+    `<button class="player-chip" data-login="${escapeAttr(p)}">${escapeHtml(p)}</button>`
+  ).join("")}</div>`;
+
+  main.innerHTML = html;
+
+  main.querySelectorAll('[data-login]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const name = btn.dataset.login;
+      const adminSession = isAdmin();
+      state.current = name;
+      if(!adminSession) saveLocalName(name);
+      document.getElementById("tabs").style.display = "";
+      render();
+    };
+  });
+}
+
+window.addEventListener("online", ()=>{ updateSyncStatus("","Online"); if(saveRequested) flushSave(); });
+window.addEventListener("offline", ()=>updateSyncStatus("error","Offline"));
+window.addEventListener("pagehide", ()=>{
+  commitAllCompleteDrafts(true);
+  if(saveRequested && !saveRunning) flushSave(true);
+});
+
+/* ---------- INIT ---------- */
+(async function(){
+  await loadState();
+  const pendingChanges = readPendingChanges();
+  if(pendingChanges.length){
+    applyChanges(state, pendingChanges);
+    saveRequested = true;
+    updateSyncStatus("error","Opnieuw proberen…");
+    scheduleSaveRetry(800);
+  }
+  const localName = await loadLocalName();
+  if(localName && state.players.includes(localName)){
+    state.localName = localName;
+    state.current = localName;
+    render();
+  } else {
+    renderLogin();
+  }
+
+  // Haal wijzigingen van andere spelers regelmatig op, maar nooit tijdens een lokale opslagactie.
+  if(CONFIG.API_URL && CONFIG.API_URL.indexOf("http")===0){
+    setInterval(async ()=>{
+      if(saveRunning || saveRequested || hasLocalDrafts()) return;
+      const before = JSON.stringify(sharedSnapshot());
+      await loadState();
+      const after = JSON.stringify(sharedSnapshot());
+      if(before!==after) render();
+    }, 12000);
+    window.addEventListener("focus", async ()=>{
+      if(saveRunning || saveRequested || hasLocalDrafts()) return;
+      const before = JSON.stringify(sharedSnapshot());
+      await loadState();
+      if(before!==JSON.stringify(sharedSnapshot())) render();
+    });
+  }
+})();
+</script>
+</body>
+</html>
